@@ -1,12 +1,14 @@
 language: ruby
 rvm:
 - 2.0.0
+env:
+- PATH="/home/travis/narwhal/bin:$PATH"
+  CAPP_BUILD="/home/travis/build/bunnylabs/bunnylabs-frontend-source/Build"
 before_install:
 - openssl aes-256-cbc -K $encrypted_1093b4527c93_key -iv $encrypted_1093b4527c93_iv
   -in deploy-key.enc -out deploy-key -d
 - chmod 600 deploy-key
 - cp deploy-key ~/.ssh/id_rsa
-- curl https://raw.githubusercontent.com/cappuccino/cappuccino/v0.9.7-1/bootstrap.sh
-  >/tmp/cb.sh && bash /tmp/cb.sh --noprompt
+- curl https://raw.githubusercontent.com/cappuccino/cappuccino/v0.9.7-1/bootstrap.sh > /tmp/cb.sh && bash /tmp/cb.sh --noprompt
 script:
 - bash deploy
