@@ -1,0 +1,18 @@
+#!/bin/bash
+
+bundle exec middleman build
+pushd build
+jake deploy
+popd
+
+git clone git@github.com:bunnylabs/bunnylabs.github.io
+pushd bunnylabs.github.io
+git config --global user.email "davidsiaw@gmail.com"
+git config --global user.name "David Siaw (via Travis CI)"
+git config --global push.default simple
+cp -r ../build/Build/Release/BunnyLabs/* .
+git add *
+git commit -m "Update site"
+git push
+popd
+rm -rf davidsiaw.github.io
