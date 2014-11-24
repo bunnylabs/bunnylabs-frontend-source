@@ -53,6 +53,17 @@ set :js_dir, 'javascripts'
 
 set :images_dir, 'images'
 
+set :title, 'BunnyLabs'
+set :author, 'David Siaw'
+set :date, Time::new.strftime('%c')
+set :organization, 'BunnyLabs'
+
+set :capp_exception_backtrace, false
+set :capp_suppress_message_exceptions, false
+set :capp_type_checking, true
+set :capp_logger, :default
+set :capp_tag_elements, true
+
 # Build-specific configuration
 configure :build do
   # For example, change the Compass output style for deployment

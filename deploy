@@ -1,18 +1,26 @@
 #!/bin/bash
 
+# generate static code
 bundle exec middleman build
+
+#generate optimized capp
 pushd build
 jake deploy
 popd
 
+# pull the old repository
 git clone git@github.com:bunnylabs/bunnylabs.github.io
+
+# add and push new content
 pushd bunnylabs.github.io
 git config --global user.email "davidsiaw@gmail.com"
 git config --global user.name "David Siaw (via Travis CI)"
 git config --global push.default simple
-cp -r ../build/Build/Release/BunnyLabs/* .
+cp -r ../build/Build/Release/BunnyLabs/* . # TODO use rsync --delete
 git add *
 git commit -m "Update site"
 git push
 popd
-rm -rf davidsiaw.github.io
+
+# cleanup
+rm -rf bunnylabs.github.io

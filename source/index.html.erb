@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <!--
- index-debug.html
- BunnyLabs
+ index.html
+ <%= config[:title] %>
 
- Created by You on November 22, 2014.
- Copyright 2014, Your Company All rights reserved.
+ Created by <%= config[:author] %> on <%= config[:date] %>.
+ Copyright 2014, <%= config[:organization] %> All rights reserved.
 -->
     <head>
         <meta charset="utf-8">
@@ -25,14 +25,16 @@
         <link rel="apple-touch-icon" href="Resources/icon.png">
         <link rel="apple-touch-startup-image" href="Resources/default.png">
 
-        <title>BunnyLabs</title>
+        <title><%= config[:title] %></title>
 
         <!-- Custom javascript goes here -->
         <!-- End custom javascript -->
 
         <script type="text/javascript">
             OBJJ_MAIN_FILE = "main.j";
-            OBJJ_INCLUDE_PATHS = ["Frameworks/Debug", "Frameworks"];
+<% if config[:environment] == :development %>
+                OBJJ_INCLUDE_PATHS = ["Frameworks/Debug", "Frameworks"];
+<% end %>
 
             var progressBar = null;
 
@@ -56,36 +58,53 @@
                     '</div>';
         </script>
 
+<% if config[:environment] == :development %>
         <script type="text/javascript" src="Frameworks/Debug/Objective-J/Objective-J.js" charset="UTF-8"></script>
 
         <script type="text/javascript">
             objj_msgSend_reset();
 
             // DEBUG OPTIONS:
+    <% if config[:capp_exception_backtrace] %>
+            // Enable printing of backtraces on exceptions:
+            objj_msgSend_decorate(objj_backtrace_decorator);
+    <% end %>
 
-            // Uncomment to enable printing of backtraces on exceptions:
-            //objj_msgSend_decorate(objj_backtrace_decorator);
+    <% if config[:capp_suppress_message_exceptions] %>
+            // Suppress exceptions that take place inside a message
+            objj_msgSend_decorate(objj_supress_exceptions_decorator)
+    <% end %>
 
-            // Uncomment to supress exceptions that take place inside a message
-            //objj_msgSend_decorate(objj_supress_exceptions_decorator)
+    <% if config[:capp_type_checking] %>
+            // Enable runtime type checking:
+            objj_msgSend_decorate(objj_typecheck_decorator);
+            objj_typecheck_prints_backtrace = true;
+    <% end %>
 
-            // Uncomment to enable runtime type checking:
-            //objj_msgSend_decorate(objj_typecheck_decorator);
+    <% if config[:capp_logger] == :capp_console_logger %>
+            // Force CPLogConsole
+            CPLogUnregister(CPLogDefault);
+            CPLogRegister(CPLogConsole);
+    <% end %>
 
-            // Uncomment (along with both above) to print backtraces on type check errors:
-            //objj_typecheck_prints_backtrace = true;
+    <% if config[:capp_logger] == :capp_popup_logger %>
+            // Force CPLogPopup
+            CPLogUnregister(CPLogDefault);
+            CPLogRegister(CPLogPopup);
+    <% end %>
 
-            // Uncomment to disable the default logger (CPLogConsole if window.console exists, CPLogPopup otherwise):
-            //CPLogUnregister(CPLogDefault);
-
-            // Uncomment to enable a specific logger:
-            //CPLogRegister(CPLogConsole);
-            //CPLogRegister(CPLogPopup);
-
+    <% if config[:capp_tag_elements] %>
             // Tag view DOM elements with a "data-cappuccino-view" attribute that contains
             // the class name of the view that created them. Comment this or set to false to disable.
             appkit_tag_dom_elements = true;
+    <% else %>
+            appkit_tag_dom_elements = false;
+    <% end %>
+
         </script>
+<% else %>
+        <script type="text/javascript" src="Frameworks/Objective-J/Objective-J.js" charset="UTF-8"></script>
+<% end %>
 
         <style type="text/css">
             html, body, h1, p {
