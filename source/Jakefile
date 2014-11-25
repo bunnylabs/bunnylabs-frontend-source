@@ -33,7 +33,7 @@ app (projectName, function(task)
     task.setEmail("feedback @nospam@ yourcompany.com");
     task.setSummary("BunnyLabs");
     task.setSources(new FileList("**/*.j").exclude(FILE.join("Build", "**")).exclude(FILE.join("Frameworks", "Source", "**")));
-    task.setResources(new FileList("Resources/**"));
+    task.setResources(new FileList("Resources/**/*"));
     task.setIndexFilePath("index.html");
     task.setInfoPlistPath("Info.plist");
 

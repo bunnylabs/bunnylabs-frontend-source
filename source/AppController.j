@@ -11,6 +11,8 @@
 
 @implementation AppController : CPObject
 {
+    CPMenu mainMenu;
+    CPTextField loginStatusTextField;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
@@ -18,22 +20,41 @@
     var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMakeZero() styleMask:CPBorderlessBridgeWindowMask],
         contentView = [theWindow contentView];
 
-    var label = [[CPTextField alloc] initWithFrame:CGRectMakeZero()];
+    mainMenu = [[CPApplication sharedApplication] mainMenu];
+    [mainMenu removeAllItems];
+    
 
-    [label setStringValue:@"Hello World!"];
-    [label setFont:[CPFont boldSystemFontOfSize:24.0]];
+    loginStatusTextField = [CPTextField labelWithTitle:"Not Logged In"];
 
-    [label sizeToFit];
+    var font = [CPFont fontWithName:"Helvetica" size:14];
 
-    [label setAutoresizingMask:CPViewMinXMargin | CPViewMaxXMargin | CPViewMinYMargin | CPViewMaxYMargin];
-    [label setCenter:[contentView center]];
+    [loginStatusTextField setFrameOrigin:CGPointMake(0,6)];
+    [loginStatusTextField setFont:font];
+    [loginStatusTextField sizeToFit];
 
-    [contentView addSubview:label];
+    var item = [[CPMenuItem alloc] init];
+    [item setView:loginStatusTextField];
+    [mainMenu addItem:[CPMenuItem separatorItem]];
+    [mainMenu addItem:[CPMenuItem separatorItem]];
+    [mainMenu addItem:item];
+
+    [CPMenu setMenuBarVisible:YES];
+
+
+    var bundle = [CPBundle mainBundle];
+    var file = [bundle pathForResource:@"Images/bunnylabs.png"];
+
+    var image = [[CPImage alloc] initWithContentsOfFile:file];
+
+    var imageView = [[CPImageView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+
+    [imageView setImage:image];
+    [imageView setCenter:[contentView center]];
+
+    [contentView addSubview:imageView];
 
     [theWindow orderFront:self];
 
-    // Uncomment the following line to turn on the standard menu bar.
-    //[CPMenu setMenuBarVisible:YES];
 }
 
 @end
