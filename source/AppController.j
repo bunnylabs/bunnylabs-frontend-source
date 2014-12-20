@@ -9,22 +9,92 @@
 @import <Foundation/Foundation.j>
 @import <AppKit/AppKit.j>
 
+@import "BunnylabsLoginWindow.j"
+
 @implementation AppController : CPObject
 {
     CPMenu mainMenu;
-    CPTextField loginStatusTextField;
+    CPView contentView;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
 {
-    var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMakeZero() styleMask:CPBorderlessBridgeWindowMask],
-        contentView = [theWindow contentView];
+    var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMakeZero() styleMask:CPBorderlessBridgeWindowMask];
+    contentView = [theWindow contentView];
 
+    [theWindow setDelegate:self];
+    [theWindow orderFront:self];
+
+    [CPMenu setMenuBarVisible:YES];
+
+    [self refreshMenu];
+    [self setDesktop];
+    [self login];
+
+        var button = [CPButton buttonWithTitle:"start"];
+        [button setTarget:self];
+        [button setAction:@selector(start:)];
+        [contentView addSubview:button];
+
+}
+
+-(id)start:(id)sender
+{
+    var loginWindow = [[BunnylabsLoginWindow alloc] init];
+    [loginWindow orderFront:self];
+    return sender;
+}
+
+-(void)login
+{
+    var url = [CPURL URLWithString: "http://localhost:9292/userinfo"];
+    var request = [CPURLRequest requestWithURL: url];
+    [request setHTTPMethod:"GET"];
+    var conn = [CPURLConnection connectionWithRequest:request delegate:self];
+}
+
+-(void)connection:(CPURLConnection)connection didReceiveData:(CPString)data
+{
+    CPLog("data: " + data);
+}
+
+-(void)connectionDidFinishLoading:(CPURLConnection)connection
+{
+    CPLog("finished");
+}
+
+-(void)setDesktop
+{
+
+    var bundle = [CPBundle mainBundle];
+    var file = [bundle pathForResource:@"Images/bunnylabs.png"];
+
+    var image = [[CPImage alloc] initWithContentsOfFile:file];
+
+    var imageView = [[CPImageView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+
+    [imageView setImage:image];
+    [imageView setAutoresizingMask: CPViewMinXMargin |
+                                    CPViewMaxXMargin |
+                                    CPViewMinYMargin |
+                                    CPViewMaxYMargin];
+    [imageView setCenter:[contentView center]];
+
+    [contentView addSubview:imageView];
+}
+
+-(void)refreshMenu
+{
     mainMenu = [[CPApplication sharedApplication] mainMenu];
-    [mainMenu removeAllItems];
-    
 
-    loginStatusTextField = [CPTextField labelWithTitle:"Not Logged In"];
+    while ([mainMenu countOfItems] > 0)
+    {
+        [mainMenu removeItemAtIndex:0];
+    }
+
+    [mainMenu removeAllItems];
+
+    var loginStatusTextField = [CPTextField labelWithTitle:"Not Logged In"];
 
     var font = [CPFont fontWithName:"Helvetica" size:14];
 
@@ -37,24 +107,11 @@
     [mainMenu addItem:[CPMenuItem separatorItem]];
     [mainMenu addItem:[CPMenuItem separatorItem]];
     [mainMenu addItem:item];
+}
 
-    [CPMenu setMenuBarVisible:YES];
-
-
-    var bundle = [CPBundle mainBundle];
-    var file = [bundle pathForResource:@"Images/bunnylabs.png"];
-
-    var image = [[CPImage alloc] initWithContentsOfFile:file];
-
-    var imageView = [[CPImageView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
-
-    [imageView setImage:image];
-    [imageView setCenter:[contentView center]];
-
-    [contentView addSubview:imageView];
-
-    [theWindow orderFront:self];
-
+-(void)windowDidResize:(CPNotification)notification
+{
+    [self refreshMenu];
 }
 
 @end

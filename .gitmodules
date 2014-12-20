@@ -1,0 +1,3 @@
+[submodule "source/Frameworks/SCAuth"]
+	path = source/Frameworks/SCAuth
+	url = https://github.com/davidsiaw/SCAuth
