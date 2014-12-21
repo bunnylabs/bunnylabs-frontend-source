@@ -47,6 +47,8 @@
 #   end
 # end
 
+activate :i18n, :mount_at_root => false
+
 # Default stuff
 set :css_dir, 'stylesheets'
 

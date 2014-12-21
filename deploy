@@ -3,8 +3,12 @@
 # generate static code
 bundle exec middleman build
 
-#generate optimized capp
-pushd build
+#generate optimized capps
+pushd build/en
+jake deploy
+popd
+
+pushd build/jp
 jake deploy
 popd
 

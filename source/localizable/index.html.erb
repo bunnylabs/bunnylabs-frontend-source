@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= I18n.locale %>">
 <!--
  index.html
  <%= config[:title] %>
@@ -31,7 +31,7 @@
         <!-- End custom javascript -->
 
         <script type="text/javascript">
-            OBJJ_MAIN_FILE = "main.j";
+            OBJJ_MAIN_FILE = "<%= I18n.locale %>/main.j";
 <% if config[:environment] == :development %>
             OBJJ_INCLUDE_PATHS = ["Frameworks/Debug", "Frameworks"];
 <% end %>
@@ -51,7 +51,7 @@
 
             var loadingHTML =
                     '<div id="loading">' +
-                    '    <div id="loading-text">Loading...</div>' +
+                    '    <div id="loading-text"> <%= t(:loading) %>... </div>' +
                     '    <div id="progress-indicator">' +
                     '        <span id="progress-bar" style="width:0%"></span>' +
                     '    </div>' +
@@ -59,7 +59,7 @@
         </script>
 
 <% if config[:environment] == :development %>
-        <script type="text/javascript" src="Frameworks/Debug/Objective-J/Objective-J.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="/<%= I18n.locale %>/Frameworks/Debug/Objective-J/Objective-J.js" charset="UTF-8"></script>
 
         <script type="text/javascript">
             objj_msgSend_reset();

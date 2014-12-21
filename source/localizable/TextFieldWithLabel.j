@@ -8,6 +8,7 @@
 
 	id target @accessors;
 	SEL validator @accessors;
+	SEL textChangedSelector @accessors;
 }
 
 -(id)initWithLabel:(CPString)aLabel andPlaceHolder:(CPString)aPlaceholder andWidth:(CPInteger)aWidth
@@ -53,6 +54,11 @@
 -(void)controlTextDidChange:(CPTextField)aTextField
 {
 	[self validate];
+
+	if ([target respondsToSelector:textChangedSelector])
+	{
+		[target performSelector:textChangedSelector withObject:textField];
+	}
 }
 
 -(BOOL)validate
@@ -70,6 +76,8 @@
 		}
 		return valid;
 	}
+
+	[textField setBackgroundColor:[CPColor clearColor]];
 	return true;
 }
 

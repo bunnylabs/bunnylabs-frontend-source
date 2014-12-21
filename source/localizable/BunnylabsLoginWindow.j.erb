@@ -8,6 +8,11 @@ var REGISTRATION_STATE = 2;
 var FORGOTPASSWORD_STATE = 3;
 var CHANGEPASSWORD_STATE = 4;
 
+var MINIMUM_USERNAME_LENGTH = 4;
+var MINIMUM_PASSWORD_LENGTH = 8;
+var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+
 @implementation BunnylabsLoginWindow : CPPanel
 {
 	CPInteger currentState;
@@ -31,6 +36,8 @@ var CHANGEPASSWORD_STATE = 4;
 	CPButton changePasswordButton;
 
 	int messageSize;
+
+	CPSet errors;
 }
 
 -(id)init
@@ -38,6 +45,8 @@ var CHANGEPASSWORD_STATE = 4;
 	self = [super init];
 	if (self)
 	{
+		errors = [[CPSet alloc] init];
+
 		contentView = [self contentView];
 		[self setFrame:CGRectMake(0,0,100,100)];
 		[self center];
@@ -61,67 +70,77 @@ var CHANGEPASSWORD_STATE = 4;
 		[errorField setValue:CGInsetMake(9.0, 9.0, 9.0, 9.0) forThemeAttribute:@"content-inset"];
 		[contentView addSubview:errorField];
 
-		loginButton = [CPButton buttonWithTitle:"Log In"];
+		loginButton = [CPButton buttonWithTitle:"<%= t(:login) %>"];
 		[loginButton setFrame:CGRectMake(10,180,185,[loginButton bounds].size.height)];
 		[contentView addSubview:loginButton];
 
-		newAccountButton = [CPButton buttonWithTitle:"New Account"];
+		newAccountButton = [CPButton buttonWithTitle:"<%= t(:create_new_account) %>"];
 		[newAccountButton setFrame:CGRectMake(10,180,185,[newAccountButton bounds].size.height)];
 		[newAccountButton setTarget:self];
 		[newAccountButton setAction:@selector(newAccountButtonClicked:)];
 		[contentView addSubview:newAccountButton];
 
-		forgotPasswordButton = [CPButton buttonWithTitle:"Forgot Password"];
+		forgotPasswordButton = [CPButton buttonWithTitle:"<%= t(:forgot_password) %>"];
 		[forgotPasswordButton setFrame:CGRectMake(10,180,185,[forgotPasswordButton bounds].size.height)];
 		[forgotPasswordButton setTarget:self];
 		[forgotPasswordButton setAction:@selector(forgotPasswordButtonClicked:)];
 		[contentView addSubview:forgotPasswordButton];
 
-		registerButton = [CPButton buttonWithTitle:"Register"];
+		registerButton = [CPButton buttonWithTitle:"<%= t(:confirm_register_details) %>"];
 		[registerButton setFrame:CGRectMake(10,180,185,[registerButton bounds].size.height)];
 		[contentView addSubview:registerButton];
 
-		changePasswordButton = [CPButton buttonWithTitle:"Change Password!"];
+		changePasswordButton = [CPButton buttonWithTitle:"<%= t(:confirm_new_password) %>"];
 		[changePasswordButton setFrame:CGRectMake(10,180,185,[changePasswordButton bounds].size.height)];
 		[contentView addSubview:changePasswordButton];
 
-		submitUsernameButton = [CPButton buttonWithTitle:"Send Recovery E-mail"];
+		submitUsernameButton = [CPButton buttonWithTitle:"<%= t(:send_recovery_email) %>"];
 		[submitUsernameButton setFrame:CGRectMake(10,180,185,[submitUsernameButton bounds].size.height)];
 		[contentView addSubview:submitUsernameButton];
 
-		cancelButton = [CPButton buttonWithTitle:"Cancel"];
+		cancelButton = [CPButton buttonWithTitle:"<%= t(:cancel) %>"];
 		[cancelButton setFrame:CGRectMake(205,180,185,[cancelButton bounds].size.height)];
 		[cancelButton setTarget:self];
 		[cancelButton setAction:@selector(cancelButtonClicked:)];
 		[contentView addSubview:cancelButton];
 
 
-		usernameField = [[TextFieldWithLabel alloc] initWithLabel:"Username:" 
-													   andPlaceHolder:"Username" 
+		usernameField = [[TextFieldWithLabel alloc] initWithLabel:"<%= t(:username) %>:" 
+													   andPlaceHolder:"<%= t(:username) %>" 
 															 andWidth:380];
 		[usernameField setFrameOrigin:CGPointMake(10,20)];
+		[usernameField setTarget:self];
+		[usernameField setTextChangedSelector:@selector(textChanged:)];
 		[contentView addSubview:usernameField];
 
-		passwordField = [[TextFieldWithLabel alloc] initWithLabel:"Password:" 
-													   andPlaceHolder:"Password" 
+		passwordField = [[TextFieldWithLabel alloc] initWithLabel:"<%= t(:password) %>:" 
+													   andPlaceHolder:"<%= t(:password) %>" 
 															 andWidth:380 
 															 isSecure:YES];
 		[passwordField setFrameOrigin:CGPointMake(10,50)];
+		[passwordField setTarget:self];
+		[passwordField setTextChangedSelector:@selector(textChanged:)];
 		[contentView addSubview:passwordField];
 
-		passwordConfirmField = [[TextFieldWithLabel alloc] initWithLabel:"Password (again):" 
-															  andPlaceHolder:"Re-type your password" 
+		passwordConfirmField = [[TextFieldWithLabel alloc] initWithLabel:"<%= t(:password_again) %>:" 
+															  andPlaceHolder:"<%= t(:password_again) %>" 
 																	andWidth:380 isSecure:YES];
 		[passwordConfirmField setFrameOrigin:CGPointMake(10,80)];
+		[passwordConfirmField setTarget:self];
+		[passwordConfirmField setTextChangedSelector:@selector(textChanged:)];
 		[contentView addSubview:passwordConfirmField];
 
-		emailField = [[TextFieldWithLabel alloc] initWithLabel:"E-mail:" 
-													andPlaceHolder:"E-mail" 
+		emailField = [[TextFieldWithLabel alloc] initWithLabel:"<%= t(:email) %>:" 
+													andPlaceHolder:"<%= t(:email) %>" 
 														  andWidth:380];
 		[emailField setFrameOrigin:CGPointMake(10,110)];
+		[emailField setTarget:self];
+		[emailField setTextChangedSelector:@selector(textChanged:)];
 		[contentView addSubview:emailField];
 
 		messageSize = 0;
+
+
 
 		[self setState:LOGIN_STATE];
 	}
@@ -148,27 +167,23 @@ var CHANGEPASSWORD_STATE = 4;
 
 -(BOOL)usernameIsValid:(CPString)username
 {
-	if (username.length < 4)
+	if (username.length < MINIMUM_USERNAME_LENGTH)
 	{
-		[self setError: "Username must be at least 4 letters"];
-		[self _update];
+		[errors addObject: [CPString stringWithFormat:"<%= t(:error_username_at_least) %>", MINIMUM_USERNAME_LENGTH]];
 		return NO;
 	}
-	[self setError: ""];
-	[self _update];
+	[errors removeObject: [CPString stringWithFormat:"<%= t(:error_username_at_least) %>", MINIMUM_USERNAME_LENGTH]];
 	return YES;
 }
 
 -(BOOL)passwordIsValid:(CPString)password
 {
-	if (password.length < 8)
+	if (password.length < MINIMUM_PASSWORD_LENGTH)
 	{
-		[self setError: "Password must be at least 8 letters"];
-		[self _update];
+		[errors addObject: [CPString stringWithFormat:"<%= t(:error_password_at_least) %>", MINIMUM_PASSWORD_LENGTH]];
 		return NO;
 	}
-	[self setError: ""];
-	[self _update];
+	[errors removeObject: [CPString stringWithFormat:"<%= t(:error_password_at_least) %>", MINIMUM_PASSWORD_LENGTH]];
 	return YES;
 }
 
@@ -176,50 +191,43 @@ var CHANGEPASSWORD_STATE = 4;
 {
 	if (password !== [passwordField text])
 	{
-		[self setError: "Passwords do not match"];
-		[self _update];
+		[errors addObject: "<%= t(:error_password_does_not_match) %>"];
 		return NO;
 	}
-	[self setError: ""];
-	[self _update];
+
+	[errors removeObject: "<%= t(:error_password_does_not_match) %>"];
 	return YES;
 }
 
 -(BOOL)emailIsValid:(CPString)email
 {
-	var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-		
-	if (!re.test(email))
+	if (!EMAIL_REGEX.test(email))
 	{
-		[self setError: "Please type in a valid e-mail address"];
-		[self _update];
+		[errors addObject: "<%= t(:error_email_not_valid) %>"];
 		return NO;
 	}
-	[self setError: ""];
-	[self _update];
+	[errors removeObject: "<%= t(:error_email_not_valid) %>"];
 	return YES;
 }
 
 -(void)setMessage:(CPString)aMessage
 {
 	[messageField setStringValue:aMessage];
-	[self _update];
 }
 
 -(void)setError:(CPString)anErrorMessage
 {
 	[errorField setStringValue:anErrorMessage];
-	[self _update];
 }
 
 -(CPString)_getPasswordRules
 {
 	var rules = [
-					"We don't care if you use symbols in your password",
-					"You are responsible for your own account",
-					"Try and make your password long",
-					"Poems and lyrics are effective ways to have long passwords",
-					"If its short people can guess it easily"
+					"<%= t(:password_rule_1) %>",
+					"<%= t(:password_rule_2) %>",
+					"<%= t(:password_rule_3) %>",
+					"<%= t(:password_rule_4) %>",
+					"<%= t(:password_rule_5) %>"
 					];
 	var ruleString = "";
 	for (var i=0; i<rules.length; i++)
@@ -233,32 +241,39 @@ var CHANGEPASSWORD_STATE = 4;
 {
 	currentState = state;
 
-	[self setError:""];
-
+	[errors removeAllObjects];
+	
 	switch(currentState)
 	{
 		case LOGIN_STATE:
-			[self setMessage:"Please enter your username and password"];
+			[self setMessage:"<%= t(:login_screen_message) %>"];
 			break;
 
 		case REGISTRATION_STATE:
-			[self setMessage:"Account registration: A validation e-mail will be sent to you which contains a link you need to click before you can use your account.\n" + [self _getPasswordRules]];
+			[self setMessage:"<%= t(:registration_screen_message) %>\n" + [self _getPasswordRules]];
 			break;
 
 		case FORGOTPASSWORD_STATE:
-			[self setMessage:"Forgot your password? Fear not. Enter your username and e-mail here and a reset password link will be sent to your e-mail"];
+			[self setMessage:"<%= t(:forgot_password_screen_message) %>"];
 			break;
 
 		case CHANGEPASSWORD_STATE:
-			[self setMessage:"Change your password to something memorable and long.\n" + [self _getPasswordRules]];
+			[self setMessage:"<%= t(:change_password_screen_message) %>.\n" + [self _getPasswordRules]];
 			break;
 	}
 
 	[self _update];
 }
 
+-(void)textChanged:(TextFieldWithLabel)label
+{
+	[self _update];
+}
+
 -(void)_update
 {
+	var errorString = [[errors allObjects] componentsJoinedByString:"\n"];
+	[self setError:errorString];
 
 	var targetWidth = [self frame].size.width;
 	var targetHeight = [self frame].size.height;
@@ -291,7 +306,7 @@ var CHANGEPASSWORD_STATE = 4;
 	{
 		case LOGIN_STATE:
 
-			[self setTitle:"Log In"];
+			[self setTitle:"<%= t(:login) %>"];
 
 			[usernameField setHidden:NO];
 			[passwordField setHidden:NO];
@@ -314,10 +329,10 @@ var CHANGEPASSWORD_STATE = 4;
 			[newAccountButton setFrame:CGRectMake(10, 110 + messageSize,185, [loginButton bounds].size.height)];
 			[forgotPasswordButton setFrame:CGRectMake(205, 110 + messageSize,185, [cancelButton bounds].size.height)];
 
-			[usernameField setTarget:nil];
-			[passwordField setTarget:nil];
-			[passwordConfirmField setTarget:nil];
-			[emailField setTarget:nil];
+			[usernameField setValidator:nil];
+			[passwordField setValidator:nil];
+			[passwordConfirmField setValidator:nil];
+			[emailField setValidator:nil];
 
 			[self setDefaultButton: loginButton];
 
@@ -328,7 +343,7 @@ var CHANGEPASSWORD_STATE = 4;
 
 		case REGISTRATION_STATE:
 
-			[self setTitle:"Register"];
+			[self setTitle:"<%= t(:create_new_account) %>"];
 
 			[usernameField setHidden:NO];
 			[passwordField setHidden:NO];
@@ -353,16 +368,9 @@ var CHANGEPASSWORD_STATE = 4;
 
 			[self setDefaultButton: registerButton];
 
-			[usernameField setTarget:self];
 			[usernameField setValidator:@selector(usernameIsValid:)];
-
-			[passwordField setTarget:self];
 			[passwordField setValidator:@selector(passwordIsValid:)];
-
-			[passwordConfirmField setTarget:self];
 			[passwordConfirmField setValidator:@selector(passwordsMatch:)];
-
-			[emailField setTarget:self];
 			[emailField setValidator:@selector(emailIsValid:)];
 
 			targetWidth = 400;
@@ -372,7 +380,7 @@ var CHANGEPASSWORD_STATE = 4;
 
 		case FORGOTPASSWORD_STATE:
 
-			[self setTitle:"Forgot Password"];
+			[self setTitle:"<%= t(:forgot_password) %>"];
 
 			[usernameField setHidden:NO];
 			[passwordField setHidden:YES];
@@ -394,10 +402,10 @@ var CHANGEPASSWORD_STATE = 4;
 
 			[self setDefaultButton: submitUsernameButton];
 
-			[usernameField setTarget:nil];
-			[passwordField setTarget:nil];
-			[passwordConfirmField setTarget:nil];
-			[emailField setTarget:nil];
+			[usernameField setValidator:nil];
+			[passwordField setValidator:nil];
+			[passwordConfirmField setValidator:nil];
+			[emailField setValidator:nil];
 
 			targetWidth = 400;
 			targetHeight = 150 + messageSize;
@@ -406,7 +414,7 @@ var CHANGEPASSWORD_STATE = 4;
 
 		case CHANGEPASSWORD_STATE:
 
-			[self setTitle:"Change Password"];
+			[self setTitle:"<%= t(:change_password) %>"];
 
 			[usernameField setHidden:YES];
 			[passwordField setHidden:NO];
@@ -428,21 +436,21 @@ var CHANGEPASSWORD_STATE = 4;
 
 			[self setDefaultButton: changePasswordButton];
 
-			[usernameField setTarget:nil];
-
-			[passwordField setTarget:self];
+			[usernameField setValidator:nil];
 			[passwordField setValidator:@selector(passwordIsValid:)];
-
-			[passwordConfirmField setTarget:self];
 			[passwordConfirmField setValidator:@selector(passwordsMatch:)];
-
-			[emailField setTarget:nil];
+			[emailField setValidator:nil];
 
 			targetWidth = 400;
 			targetHeight = 150 + messageSize;
 
 			break;
 	}
+
+	[usernameField validate];
+	[passwordField validate];
+	[passwordConfirmField validate];
+	[emailField validate];
 
 	var xmargins = (targetWidth - [self frame].size.width) / 2;
 	var ymargins = (targetHeight - [self frame].size.height) / 2;
