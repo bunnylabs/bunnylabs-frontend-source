@@ -15,6 +15,8 @@
 {
     CPMenu mainMenu;
     CPView contentView;
+
+    var loginWindow;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
@@ -31,17 +33,32 @@
     [self setDesktop];
     [self login];
 
-        var button = [CPButton buttonWithTitle:"start"];
+        var button = [CPButton buttonWithTitle:"login"];
         [button setTarget:self];
-        [button setAction:@selector(start:)];
+        [button setAction:@selector(login:)];
         [contentView addSubview:button];
+
+        var cpbutton = [CPButton buttonWithTitle:"changepass"];
+        [cpbutton setFrameOrigin:CGPointMake(0,20)];
+        [cpbutton setTarget:self];
+        [cpbutton setAction:@selector(changepass:)];
+        [contentView addSubview:cpbutton];
+
+        loginWindow = [[BunnylabsLoginWindow alloc] init];
 
 }
 
--(id)start:(id)sender
+-(id)login:(id)sender
 {
-    var loginWindow = [[BunnylabsLoginWindow alloc] init];
     [loginWindow orderFront:self];
+    [loginWindow setState:[BunnylabsLoginWindow loginState]];
+    return sender;
+}
+
+-(id)changepass:(id)sender
+{
+    [loginWindow orderFront:self];
+    [loginWindow setState:[BunnylabsLoginWindow changePasswordState]];
     return sender;
 }
 

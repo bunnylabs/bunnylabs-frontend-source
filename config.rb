@@ -47,12 +47,14 @@
 #   end
 # end
 
+# Default stuff
 set :css_dir, 'stylesheets'
 
 set :js_dir, 'javascripts'
 
 set :images_dir, 'images'
 
+# Bunnylabs specific
 set :title, 'BunnyLabs'
 set :author, 'David Siaw'
 set :date, Time::new.strftime('%c')
@@ -60,7 +62,7 @@ set :organization, 'BunnyLabs'
 
 set :capp_exception_backtrace, false
 set :capp_suppress_message_exceptions, false
-set :capp_type_checking, true
+set :capp_type_checking, false
 set :capp_logger, :default
 set :capp_tag_elements, true
 
