@@ -242,7 +242,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	currentState = state;
 
 	[errors removeAllObjects];
-	
+
 	switch(currentState)
 	{
 		case LOGIN_STATE:
@@ -281,7 +281,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	var messageFieldSize = {width: [messageField frame].size.width, height: 0};
 	if ([messageField stringValue] && [messageField stringValue].length > 0)
 	{
-		messageFieldSize = [[messageField stringValue] sizeWithFont:[messageField font] inWidth:[messageField frame].size.width];
+		messageFieldSize = [[messageField stringValue] sizeWithFont:[messageField font] inWidth:[messageField frame].size.width + 18];
 		[messageField setFrame:CGRectMake(0, 0, messageFieldSize.width, messageFieldSize.height + 18)];
 	}
 	else
@@ -292,7 +292,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	var errorFieldSize = {width: [errorField frame].size.width, height: 0};
 	if ([errorField stringValue] && [errorField stringValue].length > 0)
 	{
-		errorFieldSize = [[errorField stringValue] sizeWithFont:[errorField font] inWidth:[errorField frame].size.width];
+		errorFieldSize = [[errorField stringValue] sizeWithFont:[errorField font] inWidth:[errorField frame].size.width + 18];
 		[errorField setFrame:CGRectMake(0, [messageField frame].size.height, errorFieldSize.width, errorFieldSize.height + 18)];
 	}
 	else

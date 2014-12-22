@@ -20,8 +20,14 @@ pushd bunnylabs.github.io
 git config --global user.email "davidsiaw@gmail.com"
 git config --global user.name "David Siaw (via Travis CI)"
 git config --global push.default simple
-cp -r ../build/Build/Release/BunnyLabs/* . # TODO use rsync --delete
+rm -r *
+cp ../build/* .
+mkdir -p en
+cp -r ../build/en/Build/Release/BunnyLabs/* en/
+mkdir -p jp
+cp -r ../build/jp/Build/Release/BunnyLabs/* jp/
 git add *
+git add -u
 git commit -m "Update site"
 git push
 popd

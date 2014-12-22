@@ -31,7 +31,7 @@
         <!-- End custom javascript -->
 
         <script type="text/javascript">
-            OBJJ_MAIN_FILE = "<%= I18n.locale %>/main.j";
+            OBJJ_MAIN_FILE = "/<%= I18n.locale %>/main.j";
 <% if config[:environment] == :development %>
             OBJJ_INCLUDE_PATHS = ["Frameworks/Debug", "Frameworks"];
 <% end %>
@@ -103,7 +103,7 @@
 
         </script>
 <% else %>
-        <script type="text/javascript" src="Frameworks/Objective-J/Objective-J.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="/<%= I18n.locale %>/Frameworks/Objective-J/Objective-J.js" charset="UTF-8"></script>
 <% end %>
 
         <style type="text/css">
