@@ -39,18 +39,6 @@
 	return self;
 }
 
--(void)controlTextDidFocus:(CPTextField)aTextField
-{
-}
-
--(void)controlTextDidBlur:(CPTextField)aTextField
-{
-}
-
--(void)controlTextDidBeginEditing:(CPTextField)aTextField
-{
-}
-
 -(void)controlTextDidChange:(CPTextField)aTextField
 {
 	[self validate];

@@ -247,18 +247,42 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	{
 		case LOGIN_STATE:
 			[self setMessage:"<%= t(:login_screen_message) %>"];
+
+			[usernameField setValidator:nil];
+			[passwordField setValidator:nil];
+			[passwordConfirmField setValidator:nil];
+			[emailField setValidator:nil];
+
 			break;
 
 		case REGISTRATION_STATE:
 			[self setMessage:"<%= t(:registration_screen_message) %>\n" + [self _getPasswordRules]];
+
+			[usernameField setValidator:@selector(usernameIsValid:)];
+			[passwordField setValidator:@selector(passwordIsValid:)];
+			[passwordConfirmField setValidator:@selector(passwordsMatch:)];
+			[emailField setValidator:@selector(emailIsValid:)];
+
 			break;
 
 		case FORGOTPASSWORD_STATE:
 			[self setMessage:"<%= t(:forgot_password_screen_message) %>"];
+
+			[usernameField setValidator:nil];
+			[passwordField setValidator:nil];
+			[passwordConfirmField setValidator:nil];
+			[emailField setValidator:nil];
+
 			break;
 
 		case CHANGEPASSWORD_STATE:
+		
 			[self setMessage:"<%= t(:change_password_screen_message) %>.\n" + [self _getPasswordRules]];
+
+			[usernameField setValidator:nil];
+			[passwordField setValidator:@selector(passwordIsValid:)];
+			[passwordConfirmField setValidator:@selector(passwordsMatch:)];
+			[emailField setValidator:nil];
 			break;
 	}
 
@@ -272,6 +296,12 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 -(void)_update
 {
+
+	[usernameField validate];
+	[passwordField validate];
+	[passwordConfirmField validate];
+	[emailField validate];
+
 	var errorString = [[errors allObjects] componentsJoinedByString:"\n"];
 	[self setError:errorString];
 
@@ -281,7 +311,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	var messageFieldSize = {width: [messageField frame].size.width, height: 0};
 	if ([messageField stringValue] && [messageField stringValue].length > 0)
 	{
-		messageFieldSize = [[messageField stringValue] sizeWithFont:[messageField font] inWidth:[messageField frame].size.width + 18];
+		messageFieldSize = [[messageField stringValue] sizeWithFont:[messageField font] inWidth:[messageField frame].size.width];
 		[messageField setFrame:CGRectMake(0, 0, messageFieldSize.width, messageFieldSize.height + 18)];
 	}
 	else
@@ -292,7 +322,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	var errorFieldSize = {width: [errorField frame].size.width, height: 0};
 	if ([errorField stringValue] && [errorField stringValue].length > 0)
 	{
-		errorFieldSize = [[errorField stringValue] sizeWithFont:[errorField font] inWidth:[errorField frame].size.width + 18];
+		errorFieldSize = [[errorField stringValue] sizeWithFont:[errorField font] inWidth:[errorField frame].size.width];
 		[errorField setFrame:CGRectMake(0, [messageField frame].size.height, errorFieldSize.width, errorFieldSize.height + 18)];
 	}
 	else
@@ -329,10 +359,6 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[newAccountButton setFrame:CGRectMake(10, 110 + messageSize,185, [loginButton bounds].size.height)];
 			[forgotPasswordButton setFrame:CGRectMake(205, 110 + messageSize,185, [cancelButton bounds].size.height)];
 
-			[usernameField setValidator:nil];
-			[passwordField setValidator:nil];
-			[passwordConfirmField setValidator:nil];
-			[emailField setValidator:nil];
 
 			[self setDefaultButton: loginButton];
 
@@ -368,10 +394,6 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 			[self setDefaultButton: registerButton];
 
-			[usernameField setValidator:@selector(usernameIsValid:)];
-			[passwordField setValidator:@selector(passwordIsValid:)];
-			[passwordConfirmField setValidator:@selector(passwordsMatch:)];
-			[emailField setValidator:@selector(emailIsValid:)];
 
 			targetWidth = 400;
 			targetHeight = 210 + messageSize;
@@ -402,10 +424,6 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 			[self setDefaultButton: submitUsernameButton];
 
-			[usernameField setValidator:nil];
-			[passwordField setValidator:nil];
-			[passwordConfirmField setValidator:nil];
-			[emailField setValidator:nil];
 
 			targetWidth = 400;
 			targetHeight = 150 + messageSize;
@@ -436,21 +454,11 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 			[self setDefaultButton: changePasswordButton];
 
-			[usernameField setValidator:nil];
-			[passwordField setValidator:@selector(passwordIsValid:)];
-			[passwordConfirmField setValidator:@selector(passwordsMatch:)];
-			[emailField setValidator:nil];
-
 			targetWidth = 400;
 			targetHeight = 150 + messageSize;
 
 			break;
 	}
-
-	[usernameField validate];
-	[passwordField validate];
-	[passwordConfirmField validate];
-	[emailField validate];
 
 	var xmargins = (targetWidth - [self frame].size.width) / 2;
 	var ymargins = (targetHeight - [self frame].size.height) / 2;
