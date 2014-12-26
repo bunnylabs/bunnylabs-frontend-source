@@ -7,13 +7,14 @@ var LOGIN_STATE = 1;
 var REGISTRATION_STATE = 2;
 var FORGOTPASSWORD_STATE = 3;
 var CHANGEPASSWORD_STATE = 4;
+var WAITING_STATE = 5;
 
 var MINIMUM_USERNAME_LENGTH = 4;
 var MINIMUM_PASSWORD_LENGTH = 8;
 var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 
-@implementation BunnylabsLoginWindow : CPPanel
+@implementation SessionWindow : CPPanel
 {
 	CPInteger currentState;
 
@@ -34,6 +35,8 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	CPButton submitUsernameButton;
 	CPButton cancelButton;
 	CPButton changePasswordButton;
+
+	CPImageView spinnerView;
 
 	int messageSize;
 
@@ -72,6 +75,8 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 		loginButton = [CPButton buttonWithTitle:"<%= t(:login) %>"];
 		[loginButton setFrame:CGRectMake(10,180,185,[loginButton bounds].size.height)];
+		[loginButton setTarget:self];
+		[loginButton setAction:@selector(loginButtonClicked:)];
 		[contentView addSubview:loginButton];
 
 		newAccountButton = [CPButton buttonWithTitle:"<%= t(:create_new_account) %>"];
@@ -88,14 +93,20 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 		registerButton = [CPButton buttonWithTitle:"<%= t(:confirm_register_details) %>"];
 		[registerButton setFrame:CGRectMake(10,180,185,[registerButton bounds].size.height)];
+		[registerButton setTarget:self];
+		[registerButton setAction:@selector(registerButtonClicked:)];
 		[contentView addSubview:registerButton];
 
 		changePasswordButton = [CPButton buttonWithTitle:"<%= t(:confirm_new_password) %>"];
 		[changePasswordButton setFrame:CGRectMake(10,180,185,[changePasswordButton bounds].size.height)];
+		[changePasswordButton setTarget:self];
+		[changePasswordButton setAction:@selector(changePasswordButtonClicked:)];
 		[contentView addSubview:changePasswordButton];
 
 		submitUsernameButton = [CPButton buttonWithTitle:"<%= t(:send_recovery_email) %>"];
 		[submitUsernameButton setFrame:CGRectMake(10,180,185,[submitUsernameButton bounds].size.height)];
+		[submitUsernameButton setTarget:self];
+		[submitUsernameButton setAction:@selector(submitUsernameButtonClicked:)];
 		[contentView addSubview:submitUsernameButton];
 
 		cancelButton = [CPButton buttonWithTitle:"<%= t(:cancel) %>"];
@@ -138,6 +149,18 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 		[emailField setTextChangedSelector:@selector(textChanged:)];
 		[contentView addSubview:emailField];
 
+		var spinner = [[CPImage alloc] initWithContentsOfFile:
+				[[CPBundle mainBundle] pathForResource:"spinner.gif"]
+												  size:CGSizeMake(20,20)
+			];
+		[spinner setDelegate:self];
+		spinnerView = [[CPImageView alloc] init];
+		[spinnerView setImage:spinner];
+		[spinnerView setHidden:YES];
+		[spinnerView setFrame:CGRectMake(400,400,60,60)];
+
+		[contentView addSubview:spinnerView];
+
 		messageSize = 0;
 
 
@@ -145,6 +168,57 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 		[self setState:LOGIN_STATE];
 	}
 	return self;
+}
+
+-(CPString)username
+{
+	return [usernameField text];
+}
+
+-(CPString)password
+{
+	return [passwordField text];
+}
+
+-(CPString)email
+{
+	return [emailField text];
+}
+
+-(id)loginButtonClicked:(id)sender
+{
+	if ([[self delegate] respondsToSelector:@selector(loginButtonClicked:)])
+	{
+		[[self delegate] loginButtonClicked:self];
+	}
+	return sender;
+}
+
+-(id)registerButtonClicked:(id)sender
+{
+	if ([[self delegate] respondsToSelector:@selector(registerButtonClicked:)])
+	{
+		[[self delegate] registerButtonClicked:self];
+	}
+	return sender;
+}
+
+-(id)changePasswordButtonClicked:(id)sender
+{
+	if ([[self delegate] respondsToSelector:@selector(changePasswordButtonClicked:)])
+	{
+		[[self delegate] changePasswordButtonClicked:self];
+	}
+	return sender;
+}
+
+-(id)submitUsernameButtonClicked:(id)sender
+{
+	if ([[self delegate] respondsToSelector:@selector(submitUsernameButtonClicked:)])
+	{
+		[[self delegate] submitUsernameButtonClicked:self];
+	}
+	return sender;
 }
 
 -(id)cancelButtonClicked:(id)sender
@@ -243,6 +317,11 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 	[errors removeAllObjects];
 
+	[usernameField setText:""];
+	[passwordField setText:""];
+	[passwordConfirmField setText:""];
+	[emailField setText:""];
+
 	switch(currentState)
 	{
 		case LOGIN_STATE:
@@ -283,6 +362,17 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[passwordField setValidator:@selector(passwordIsValid:)];
 			[passwordConfirmField setValidator:@selector(passwordsMatch:)];
 			[emailField setValidator:nil];
+			break;
+
+		case WAITING_STATE:
+
+			[self setMessage:""];
+
+			[usernameField setValidator:nil];
+			[passwordField setValidator:nil];
+			[passwordConfirmField setValidator:nil];
+			[emailField setValidator:nil];
+
 			break;
 	}
 
@@ -349,6 +439,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[loginButton setHidden:NO];
 			[changePasswordButton setHidden:YES];
 			[cancelButton setHidden:NO];
+			[spinnerView setHidden:YES];
 
 			[usernameField setFrameOrigin:CGPointMake(10,10 + messageSize)];
 			[passwordField setFrameOrigin:CGPointMake(10,40 + messageSize)];
@@ -382,6 +473,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[loginButton setHidden:YES];
 			[changePasswordButton setHidden:YES];
 			[cancelButton setHidden:NO];
+			[spinnerView setHidden:YES];
 
 			[usernameField setFrameOrigin:CGPointMake(10,10 + messageSize)];
 			[passwordField setFrameOrigin:CGPointMake(10,40 + messageSize)];
@@ -415,6 +507,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[loginButton setHidden:YES];
 			[changePasswordButton setHidden:YES];
 			[cancelButton setHidden:NO];
+			[spinnerView setHidden:YES];
 
 			[usernameField setFrameOrigin:CGPointMake(10,10 + messageSize)];
 			[emailField setFrameOrigin:CGPointMake(10,40 + messageSize)];
@@ -445,6 +538,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[loginButton setHidden:YES];
 			[changePasswordButton setHidden:NO];
 			[cancelButton setHidden:NO];
+			[spinnerView setHidden:YES];
 
 			[passwordField setFrameOrigin:CGPointMake(10,10 + messageSize)];
 			[passwordConfirmField setFrameOrigin:CGPointMake(10,40 + messageSize)];
@@ -458,10 +552,43 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			targetHeight = 150 + messageSize;
 
 			break;
+
+		case WAITING_STATE:
+
+			[self setTitle:"<%= t(:please_wait) %>"];
+
+			[usernameField setHidden:YES];
+			[passwordField setHidden:YES];
+			[passwordConfirmField setHidden:YES];
+			[emailField setHidden:YES];
+			[registerButton setHidden:YES];
+			[submitUsernameButton setHidden:YES];
+			[newAccountButton setHidden:YES];
+			[forgotPasswordButton setHidden:YES];
+			[loginButton setHidden:YES];
+			[changePasswordButton setHidden:YES];
+			[cancelButton setHidden:YES];
+			[spinnerView setHidden:NO];
+
+			[spinnerView setFrameOrigin:CGPointMake(170, 30 + messageSize)];
+
+			targetWidth = 400;
+			targetHeight = 150 + messageSize;
+
+			break;
 	}
 
 	var xmargins = (targetWidth - [self frame].size.width) / 2;
 	var ymargins = (targetHeight - [self frame].size.height) / 2;
+
+	if([errors allObjects].length > 0)
+	{
+		[[self defaultButton] setEnabled:NO];
+	}
+	else
+	{
+		[[self defaultButton] setEnabled:YES];
+	}
 
 	[self setFrame:CGRectMake([self frame].origin.x - xmargins, [self frame].origin.y - ymargins, targetWidth, targetHeight) 
 			display:YES 
@@ -493,4 +620,8 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	return CHANGEPASSWORD_STATE;
 }
 
++(CPInteger)waitingState
+{
+	return WAITING_STATE;
+}
 @end

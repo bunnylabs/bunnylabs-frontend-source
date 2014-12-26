@@ -9,14 +9,12 @@
 @import <Foundation/Foundation.j>
 @import <AppKit/AppKit.j>
 
-@import "BunnylabsLoginWindow.j"
+@import "SessionManager.j"
 
 @implementation AppController : CPObject
 {
     CPMenu mainMenu;
     CPView contentView;
-
-    var loginWindow;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
@@ -31,7 +29,8 @@
 
     [self refreshMenu];
     [self setDesktop];
-    [self login];
+
+
 
         var button = [CPButton buttonWithTitle:"login"];
         [button setTarget:self];
@@ -43,41 +42,17 @@
         [cpbutton setTarget:self];
         [cpbutton setAction:@selector(changepass:)];
         [contentView addSubview:cpbutton];
-
-        loginWindow = [[BunnylabsLoginWindow alloc] init];
-
+    //[SessionManager instance] 
 }
 
 -(id)login:(id)sender
 {
-    [loginWindow orderFront:self];
-    [loginWindow setState:[BunnylabsLoginWindow loginState]];
-    return sender;
+    [[SessionManager instance] showLoginWindow];
 }
 
 -(id)changepass:(id)sender
 {
-    [loginWindow orderFront:self];
-    [loginWindow setState:[BunnylabsLoginWindow changePasswordState]];
-    return sender;
-}
-
--(void)login
-{
-    var url = [CPURL URLWithString: "http://localhost:9292/userinfo"];
-    var request = [CPURLRequest requestWithURL: url];
-    [request setHTTPMethod:"GET"];
-    var conn = [CPURLConnection connectionWithRequest:request delegate:self];
-}
-
--(void)connection:(CPURLConnection)connection didReceiveData:(CPString)data
-{
-    CPLog("data: " + data);
-}
-
--(void)connectionDidFinishLoading:(CPURLConnection)connection
-{
-    CPLog("finished");
+    [[SessionManager instance] showChangePasswordWindow];
 }
 
 -(void)setDesktop
