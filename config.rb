@@ -68,6 +68,14 @@ set :capp_type_checking, false
 set :capp_logger, :default
 set :capp_tag_elements, true
 
+configure :development do
+  set :api_server_url, "http://localhost:9292"
+end
+
+configure :build do
+  set :api_server_url, "http://api.labs.astrobunny.net"
+end
+
 # Build-specific configuration
 configure :build do
   # For example, change the Compass output style for deployment

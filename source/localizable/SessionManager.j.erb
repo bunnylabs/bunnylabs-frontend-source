@@ -1,0 +1,117 @@
+@import <Foundation/Foundation.j>
+
+var apiServerUrl = "<%= config[:api_server_url] %>";
+var session;
+
+@implementation SessionManager : CPObject
+{
+	CPString authToken;
+}
+
+-(id)init
+{
+	self = [super init];
+	if (!self)
+	{
+		/*persistjs*/
+		authToken = "";
+	}
+	return self;
+}
+
+-(id)get:(CPString)aUrl andNotify:(id)delegate
+{
+    var url = [CPURL URLWithString: apiServerUrl + aUrl];
+    var request = [CPURLRequest requestWithURL:aUrl];
+    [request setHTTPMethod:"GET"];
+    [request setValue:authToken forHTTPHeaderField:"AuthenticationToken"];
+    var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
+}
+
+-(id)post:(CPString)aUrl withData:(id)json andNotify:(id)delegate
+{
+    var url = [CPURL URLWithString: apiServerUrl + aUrl];
+    var request = [CPURLRequest requestWithURL:aUrl];
+    [request setHTTPMethod:"POST"];
+    [request setHTTPBody:JSON.stringify(json)];
+    [request setValue:authToken forHTTPHeaderField:"AuthenticationToken"];
+    var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
+}
+
+-(id)put:(CPString)aUrl withData:(id)json andNotify:(id)delegate
+{
+    var url = [CPURL URLWithString: apiServerUrl + aUrl];
+    var request = [CPURLRequest requestWithURL:aUrl];
+    [request setHTTPMethod:"PUT"];
+    [request setHTTPBody:JSON.stringify(json)];
+    [request setValue:authToken forHTTPHeaderField:"AuthenticationToken"];
+    var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
+}
+
+-(id)delete:(CPString)aUrl andNotify:(id)delegate
+{
+    var url = [CPURL URLWithString: apiServerUrl + aUrl];
+    var request = [CPURLRequest requestWithURL:aUrl];
+    [request setHTTPMethod:"DELETE"];
+    [request setValue:authToken forHTTPHeaderField:"AuthenticationToken"];
+    var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
+}
+
+-(void)loginWithUsername:(CPString)aUsername andPassword:(CPString)aPassword
+{
+	[self post:"/session" withData:{username: aUsername, password: aPassword /* captcha */} andNotify:self];
+}
+
+-(void)register:(CPString)aUsername withPassword:(CPString)aPassword andEmail:(CPString)anEmail
+{
+	[self post:"/user" withData:{username: aUsername, password: aPassword, email: anEmail /* captcha */} andNotify:self];
+}
+
+-(void)changePassword:(CPString)aPassword forUser:(CPString)aUsername
+{
+	[self put:"/user/" + aUsername withData:{password: aPassword} andNotify:self];
+}
+
+-(void)requestForgottenPasswordForUser:(CPString)aUsername andEmail:(CPString)anEmail
+{
+	[self post:"/user/" + aUsername + "/forgotPassword", withData:{/* captcha */} andNotify:self];
+}
+
+-(void)connection:(CPURLConnection)connection didFailWithError:(id)error
+{
+	CPLog(error);
+}
+
+-(void)connection:(CPURLConnection)connection didReceiveResponse:(CPHTTPURLResponse)response
+{
+
+}
+
+-(void)connection:(CPURLConnection)connection didReceiveData:(CPString)data
+{
+
+}
+
+-(void)connectionDidFinishLoading:(CPURLConnection)connection
+{
+
+}
+
+-(void)connectionDidReceiveAuthenticationChallenge:(id)connection
+{
+
+}
+
++(SessionManager)instance
+{
+	if (!session)
+	{
+		session = [[SessionManager alloc] init];
+	}
+	return session;
+}
+
+@end
+
+[CPURLConnection setClassDelegate:[SessionManager instance]];
+
