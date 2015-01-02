@@ -8,6 +8,9 @@ var session;
 @implementation SessionManager : CPWindowController
 {
 	CPString authToken;
+    SEL currentResponseHandler;
+    int currentStatusCode;
+    CPString currentData;
 }
 
 -(id)init
@@ -18,8 +21,34 @@ var session;
 		/*persistjs*/
         [[self window] setDelegate:self];
 		authToken = "";
+        currentResponseHandler = @selector(noResponseHandler:data:)
 	}
 	return self;
+}
+
+-(void)nullResponseHandler:(int)statusCode forData:(CPString)data
+{
+
+}
+
+-(void)loginResponseHandler:(int)statusCode forData:(CPString)data
+{
+    [[self window] setState:[SessionWindow loginState]];
+}
+
+-(void)registerResponseHandler:(int)statusCode forData:(CPString)data
+{
+    [[self window] setState:[SessionWindow registrationState]];
+}
+
+-(void)submitUsernameResponseHandler:(int)statusCode forData:(CPString)data
+{
+    [[self window] setState:[SessionWindow changePasswordState]];
+}
+
+-(void)forgotPasswordResponseHandler:(int)statusCode forData:(CPString)data
+{
+    [[self window] setState:[SessionWindow forgotPasswordState]];
 }
 
 -(id)get:(CPString)aUrl andNotify:(id)delegate
@@ -63,45 +92,49 @@ var session;
 -(void)loginWithUsername:(CPString)aUsername andPassword:(CPString)aPassword
 {
     CPLog("Login: %@ %@", aUsername, aPassword);
+    currentResponseHandler = @selector(loginResponseHandler:forData:)
 	[self post:"/sessions" withData:{username: aUsername, password: aPassword /* captcha */} andNotify:self];
 }
 
 -(void)register:(CPString)aUsername withPassword:(CPString)aPassword andEmail:(CPString)anEmail
 {
     CPLog("Register: %@ %@ %@", aUsername, aPassword, anEmail);
+    currentResponseHandler = @selector(registerResponseHandler:forData:)
 	[self post:"/users" withData:{username: aUsername, password: aPassword, email: anEmail /* captcha */} andNotify:self];
 }
 
 -(void)changePassword:(CPString)aPassword forUser:(CPString)aUsername
 {
     CPLog("ChangePassword: %@ %@", aUsername, aPassword);
+    currentResponseHandler = @selector(submitUsernameResponseHandler:forData:)
 	[self put:"/users/" + aUsername withData:{password: aPassword} andNotify:self];
 }
 
 -(void)requestForgottenPasswordForUser:(CPString)aUsername andEmail:(CPString)anEmail
 {
     CPLog("ForgotPassword: %@ %@", aUsername, anEmail);
+    currentResponseHandler = @selector(forgotPasswordResponseHandler:forData:)
 	[self post:"/users/" + aUsername + "/forgotPassword" withData:{/* captcha */} andNotify:self];
 }
 
 -(void)connection:(CPURLConnection)connection didFailWithError:(id)error
 {
-
+    CPLog("Error: %@", error);
 }
 
 -(void)connection:(CPURLConnection)connection didReceiveResponse:(CPHTTPURLResponse)response
 {
-
+    currentStatusCode = [response statusCode];
 }
 
 -(void)connection:(CPURLConnection)connection didReceiveData:(CPString)data
 {
-
+    currentData = data;
 }
 
 -(void)connectionDidFinishLoading:(CPURLConnection)connection
 {
-
+    [self performSelector:currentResponseHandler withObject:currentStatusCode withObject:currentData];
 }
 
 -(void)connectionDidReceiveAuthenticationChallenge:(id)connection
@@ -113,14 +146,12 @@ var session;
 {
     [self showWindow:self];
     [[self window] setState:[SessionWindow loginState]];
-    [[self window] setState:[SessionWindow waitingState]];
 }
 
 -(void)showChangePasswordWindow
 {
     [self showWindow:self];
     [[self window] setState:[SessionWindow changePasswordState]];
-    [[self window] setState:[SessionWindow waitingState]];
 }
 
 -(id)loginButtonClicked:(id)sender
@@ -138,11 +169,13 @@ var session;
 -(id)submitUsernameButtonClicked:(id)sender
 {
     [self requestForgottenPasswordForUser:[[self window] username] andEmail:[[self window] email]];
+    [[self window] setState:[SessionWindow waitingState]];
 }
 
 -(id)changePasswordButtonClicked:(id)sender
 {
     [self changePassword:[[self window] password] forUser:[[self window] username]];
+    [[self window] setState:[SessionWindow waitingState]];
 }
 
 +(SessionManager)instance

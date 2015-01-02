@@ -362,6 +362,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[passwordField setValidator:@selector(passwordIsValid:)];
 			[passwordConfirmField setValidator:@selector(passwordsMatch:)];
 			[emailField setValidator:nil];
+
 			break;
 
 		case WAITING_STATE:
@@ -624,4 +625,5 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 {
 	return WAITING_STATE;
 }
+
 @end

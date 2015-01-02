@@ -26,3 +26,4 @@ jp:
   registration_screen_message: "アカウント登録: 情報確認後はアクティベーションリンクが入っているメールを送ります。アクティベーションリンクをクリックする前にアカウントは利用できません。"
   forgot_password_screen_message: "パスワードを忘れた場合、ユーザーネームとメールアドレスを入力してください。パスワードリセットリンクはメールに送ります"
   change_password_screen_message: "長くて覚えやすいパスワードを入力してください"
+  please_wait: "しばらくお待ちください"

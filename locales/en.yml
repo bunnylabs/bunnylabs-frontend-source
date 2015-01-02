@@ -26,3 +26,4 @@ en:
   registration_screen_message: "Account registration: A validation e-mail will be sent to you which contains a link you need to click before you can use your account."
   forgot_password_screen_message: "Forgot your password? Fear not. Enter your username and e-mail here and a reset password link will be sent to your e-mail"
   change_password_screen_message: "Change your password to something memorable and long."
+  please_wait: "Please wait"
