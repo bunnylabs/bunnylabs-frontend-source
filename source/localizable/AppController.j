@@ -42,6 +42,13 @@
         [cpbutton setTarget:self];
         [cpbutton setAction:@selector(changepass:)];
         [contentView addSubview:cpbutton];
+
+
+        var ds = [CPButton buttonWithTitle:"dosomething"];
+        [ds setFrameOrigin:CGPointMake(0,50)];
+        [ds setTarget:self];
+        [ds setAction:@selector(ds:)];
+        [contentView addSubview:ds];
     //[SessionManager instance] 
 }
 
@@ -53,6 +60,11 @@
 -(id)changepass:(id)sender
 {
     [[SessionManager instance] showChangePasswordWindow];
+}
+
+-(id)ds:(id)sender
+{
+    [[SessionManager instance] get:"/" andNotify:self];
 }
 
 -(void)setDesktop

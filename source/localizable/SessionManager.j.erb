@@ -33,22 +33,65 @@ var session;
 
 -(void)loginResponseHandler:(int)statusCode forData:(CPString)data
 {
-    [[self window] setState:[SessionWindow loginState]];
+    if (statusCode == 200)
+    {
+        authToken = data;
+        [[self window] close];
+    }
+    else
+    {
+        [[self window] setState:[SessionWindow loginState] andResetFields:NO];
+        [[self window] setCustomError:data];
+        [[self window] update];
+    }
 }
 
 -(void)registerResponseHandler:(int)statusCode forData:(CPString)data
 {
-    [[self window] setState:[SessionWindow registrationState]];
+    if (statusCode == 200)
+    {
+        [[self window] setState:[SessionWindow loginState]];
+        [[self window] setCustomMessage:"<%= t(:registration_ok) %>"];
+        [[self window] update];
+    }
+    else
+    {
+        [[self window] setState:[SessionWindow registrationState] andResetFields:NO];
+        [[self window] setCustomError:data];
+        [[self window] update];
+    }
 }
 
 -(void)submitUsernameResponseHandler:(int)statusCode forData:(CPString)data
 {
-    [[self window] setState:[SessionWindow changePasswordState]];
+    if (statusCode == 200)
+    {
+        [[self window] setState:[SessionWindow loginState]];
+        [[self window] setCustomMessage:"<%= t(:change_password_ok) %>"];
+        [[self window] update];
+    }
+    else
+    {
+        [[self window] setState:[SessionWindow changePasswordState] andResetFields:NO];
+        [[self window] setCustomError:data];
+        [[self window] update];
+    }
 }
 
 -(void)forgotPasswordResponseHandler:(int)statusCode forData:(CPString)data
 {
-    [[self window] setState:[SessionWindow forgotPasswordState]];
+    if (statusCode == 200)
+    {
+        [[self window] setState:[SessionWindow loginState]];
+        [[self window] setCustomMessage:"<%= t(:forgot_password_ok) %>"];
+        [[self window] update];
+    }
+    else
+    {
+        [[self window] setState:[SessionWindow forgotPasswordState] andResetFields:NO];
+        [[self window] setCustomError:data];
+        [[self window] update];
+    }
 }
 
 -(id)get:(CPString)aUrl andNotify:(id)delegate
@@ -57,6 +100,7 @@ var session;
     var request = [CPURLRequest requestWithURL:url];
     [request setHTTPMethod:"GET"];
     [request setValue:authToken forHTTPHeaderField:"Authentication-Token"];
+    [request setValue:"<%= I18n.locale %>" forHTTPHeaderField:"Language"];
     var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
 }
 
@@ -67,6 +111,7 @@ var session;
     [request setHTTPMethod:"POST"];
     [request setHTTPBody:JSON.stringify(json)];
     [request setValue:authToken forHTTPHeaderField:"Authentication-Token"];
+    [request setValue:"<%= I18n.locale %>" forHTTPHeaderField:"Language"];
     var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
 }
 
@@ -77,6 +122,7 @@ var session;
     [request setHTTPMethod:"PUT"];
     [request setHTTPBody:JSON.stringify(json)];
     [request setValue:authToken forHTTPHeaderField:"Authentication-Token"];
+    [request setValue:"<%= I18n.locale %>" forHTTPHeaderField:"Language"];
     var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
 }
 
@@ -86,6 +132,7 @@ var session;
     var request = [CPURLRequest requestWithURL:url];
     [request setHTTPMethod:"DELETE"];
     [request setValue:authToken forHTTPHeaderField:"Authentication-Token"];
+    [request setValue:"<%= I18n.locale %>" forHTTPHeaderField:"Language"];
     var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
 }
 
@@ -139,7 +186,9 @@ var session;
 
 -(void)connectionDidReceiveAuthenticationChallenge:(id)connection
 {
-
+    [self showLoginWindow];
+    [[self window] setCustomMessage:"<%= t(:login_required) %>"];
+    [[self window] update];
 }
 
 -(void)showLoginWindow
@@ -183,6 +232,7 @@ var session;
 	if (!session)
 	{
 		session = [[SessionManager alloc] init];
+        [CPURLConnection setClassDelegate:session];
 	}
 	return session;
 }

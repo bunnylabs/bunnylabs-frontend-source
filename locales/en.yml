@@ -27,3 +27,7 @@ en:
   forgot_password_screen_message: "Forgot your password? Fear not. Enter your username and e-mail here and a reset password link will be sent to your e-mail"
   change_password_screen_message: "Change your password to something memorable and long."
   please_wait: "Please wait"
+  registration_ok: "You should receive an e-mail with an activation link. Go to that link and then you will be able to log in."
+  forgot_password_ok: "You should receive an e-mail containing instructions on how to change your password"
+  change_password_ok: "Your password has been changed. You may now log in with your new password"
+  login_required: "You need to log in to do this"

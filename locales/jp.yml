@@ -27,3 +27,7 @@ jp:
   forgot_password_screen_message: "パスワードを忘れた場合、ユーザーネームとメールアドレスを入力してください。パスワードリセットリンクはメールに送ります"
   change_password_screen_message: "長くて覚えやすいパスワードを入力してください"
   please_wait: "しばらくお待ちください"
+  registration_ok: "仮登録は完了しました。ログインできる前にメールに遅れたアクティベーションリンクをクリックすることが必要です"
+  forgot_password_ok: "パスワードを変更する手続き説明はメールに送りました"
+  change_password_ok: "パスワードは変更しました。新しいパスワードを使ってログインすることができます"
+  login_required: "ログインが必要です"

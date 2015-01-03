@@ -41,6 +41,10 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	int messageSize;
 
 	CPSet errors;
+	CPString message;
+
+	CPString customMessage @accessors;
+	CPString customError @accessors;
 }
 
 -(id)init
@@ -49,9 +53,11 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	if (self)
 	{
 		errors = [[CPSet alloc] init];
+		customMessage = "";
+		customError = "";
 
 		contentView = [self contentView];
-		[self setFrame:CGRectMake(0,0,100,100)];
+		[self setFrame:CGRectMake(0,0,400,100)];
 		[self center];
 		[self setFrameOrigin:CGPointMake([self frame].origin.x,[self frame].origin.y-50)];
 
@@ -313,19 +319,38 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 -(void)setState:(CPInteger)state
 {
-	currentState = state;
+	if (state == WAITING_STATE)
+	{
+		[self setState:state andResetFields:NO];
+	}
+	else
+	{
+		[self setState:state andResetFields:YES];
+	}
+}
+
+-(void)setState:(CPInteger)state andResetFields:(BOOL)eraseAllFields
+{
 
 	[errors removeAllObjects];
 
-	[usernameField setText:""];
-	[passwordField setText:""];
-	[passwordConfirmField setText:""];
-	[emailField setText:""];
+	if (eraseAllFields)
+	{
+		[usernameField setText:""];
+		[passwordField setText:""];
+		[passwordConfirmField setText:""];
+		[emailField setText:""];
+	}
+
+	customMessage = "";
+	customError = "";
+
+	currentState = state;
 
 	switch(currentState)
 	{
 		case LOGIN_STATE:
-			[self setMessage:"<%= t(:login_screen_message) %>"];
+			message = "";
 
 			[usernameField setValidator:nil];
 			[passwordField setValidator:nil];
@@ -335,7 +360,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			break;
 
 		case REGISTRATION_STATE:
-			[self setMessage:"<%= t(:registration_screen_message) %>\n" + [self _getPasswordRules]];
+			message = "<%= t(:registration_screen_message) %>\n" + [self _getPasswordRules];
 
 			[usernameField setValidator:@selector(usernameIsValid:)];
 			[passwordField setValidator:@selector(passwordIsValid:)];
@@ -345,7 +370,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			break;
 
 		case FORGOTPASSWORD_STATE:
-			[self setMessage:"<%= t(:forgot_password_screen_message) %>"];
+			message = "<%= t(:forgot_password_screen_message) %>";
 
 			[usernameField setValidator:nil];
 			[passwordField setValidator:nil];
@@ -356,7 +381,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 		case CHANGEPASSWORD_STATE:
 		
-			[self setMessage:"<%= t(:change_password_screen_message) %>.\n" + [self _getPasswordRules]];
+			message = "<%= t(:change_password_screen_message) %>.\n" + [self _getPasswordRules];
 
 			[usernameField setValidator:nil];
 			[passwordField setValidator:@selector(passwordIsValid:)];
@@ -367,7 +392,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 		case WAITING_STATE:
 
-			[self setMessage:""];
+			message = "";
 
 			[usernameField setValidator:nil];
 			[passwordField setValidator:nil];
@@ -385,6 +410,11 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	[self _update];
 }
 
+-(void)update
+{
+	[self _update];
+}
+
 -(void)_update
 {
 
@@ -393,16 +423,39 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	[passwordConfirmField validate];
 	[emailField validate];
 
-	var errorString = [[errors allObjects] componentsJoinedByString:"\n"];
+	var errorStrings = [errors allObjects];
+	if (customError.length > 0)
+	{
+		errorStrings = [errorStrings arrayByAddingObject:customError];
+	}
+
+	var errorString = [errorStrings componentsJoinedByString:"\n"];
 	[self setError:errorString];
+
+
+	var messageStrings = [ ];
+
+	if (message.length > 0)
+	{
+		messageStrings = [messageStrings arrayByAddingObject:message];
+	}
+
+	if (customMessage.length > 0)
+	{
+		messageStrings = [messageStrings arrayByAddingObject:customMessage];
+	}
+
+	var messageString = [messageStrings componentsJoinedByString:"\n"];
+	[self setMessage:messageString];
+
 
 	var targetWidth = [self frame].size.width;
 	var targetHeight = [self frame].size.height;
 
 	var messageFieldSize = {width: [messageField frame].size.width, height: 0};
-	if ([messageField stringValue] && [messageField stringValue].length > 0)
+	if (messageString && messageString.length > 0)
 	{
-		messageFieldSize = [[messageField stringValue] sizeWithFont:[messageField font] inWidth:[messageField frame].size.width];
+		messageFieldSize = [messageString sizeWithFont:[messageField font] inWidth:400];
 		[messageField setFrame:CGRectMake(0, 0, messageFieldSize.width, messageFieldSize.height + 18)];
 	}
 	else
@@ -413,7 +466,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	var errorFieldSize = {width: [errorField frame].size.width, height: 0};
 	if ([errorField stringValue] && [errorField stringValue].length > 0)
 	{
-		errorFieldSize = [[errorField stringValue] sizeWithFont:[errorField font] inWidth:[errorField frame].size.width];
+		errorFieldSize = [[errorField stringValue] sizeWithFont:[errorField font] inWidth:400];
 		[errorField setFrame:CGRectMake(0, [messageField frame].size.height, errorFieldSize.width, errorFieldSize.height + 18)];
 	}
 	else
