@@ -11,6 +11,16 @@
 
 @import "SessionManager.j"
 
+
+@implementation HashFragment : CPObject
+
++(CPString)fragment
+{
+    return window.location.hash;
+}
+
+@end
+
 @implementation AppController : CPObject
 {
     CPMenu mainMenu;
@@ -30,6 +40,7 @@
     [self refreshMenu];
     [self setDesktop];
 
+    CPLog("hash: " + [HashFragment fragment]);
 
 
         var button = [CPButton buttonWithTitle:"login"];
