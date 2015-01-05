@@ -63,11 +63,6 @@
     //[SessionManager instance] 
 }
 
--(id)login:(id)sender
-{
-    [[SessionManager instance] showLoginWindow];
-}
-
 -(id)changepass:(id)sender
 {
     [[SessionManager instance] showChangePasswordWindow];
@@ -109,19 +104,9 @@
 
     [mainMenu removeAllItems];
 
-    var loginStatusTextField = [CPTextField labelWithTitle:"Not Logged In"];
-
-    var font = [CPFont fontWithName:"Helvetica" size:14];
-
-    [loginStatusTextField setFrameOrigin:CGPointMake(0,6)];
-    [loginStatusTextField setFont:font];
-    [loginStatusTextField sizeToFit];
-
-    var item = [[CPMenuItem alloc] init];
-    [item setView:loginStatusTextField];
     [mainMenu addItem:[CPMenuItem separatorItem]];
     [mainMenu addItem:[CPMenuItem separatorItem]];
-    [mainMenu addItem:item];
+    [mainMenu addItem:[[SessionManager instance] sessionStatusMenuItem]];
 }
 
 -(void)windowDidResize:(CPNotification)notification

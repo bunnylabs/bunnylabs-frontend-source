@@ -31,3 +31,5 @@ jp:
   forgot_password_ok: "パスワードを変更する手続き説明はメールに送りました"
   change_password_ok: "パスワードは変更しました。新しいパスワードを使ってログインすることができます"
   login_required: "ログインが必要です"
+  logged_in_as: "%@さん"
+  logout: "ログアウト"
