@@ -1,6 +1,7 @@
 @import <Foundation/Foundation.j>
 
 @import "SessionWindow.j"
+@import "SessionMenuItem.j"
 
 var apiServerUrl = "<%= config[:api_server_url] %>";
 var session;
@@ -11,6 +12,8 @@ var session;
     SEL currentResponseHandler;
     int currentStatusCode;
     CPString currentData;
+
+    SessionMenuItem statusMenuItem;
 }
 
 -(id)init
@@ -22,13 +25,49 @@ var session;
         [[self window] setDelegate:self];
 		authToken = "";
         currentResponseHandler = @selector(noResponseHandler:data:)
+        statusMenuItem = [[SessionMenuItem alloc] init];
+        [statusMenuItem setTarget:self];
+        [self getUserData];
 	}
 	return self;
 }
 
+-(id)menuItemClicked:(id)sender
+{
+    [self showLoginWindow];
+    return sender;
+}
+
+-(void)getUserData
+{
+    if (authToken.length > 0)
+    {
+        currentResponseHandler = @selector(getUserDataHandler:forData:);
+        [self get:"/sessions/current" andNotify:self];
+    }
+    else
+    {
+        [statusMenuItem setTitle:"<%= t(:login) %>"];
+    }
+}
+
 -(void)nullResponseHandler:(int)statusCode forData:(CPString)data
 {
+}
 
+-(void)getUserDataHandler:(int)statusCode forData:(CPString)data
+{
+    if (statusCode == 200)
+    {
+        var result = JSON.parse(data);
+        [statusMenuItem setTitle:[CPString stringWithFormat:"<%= t(:logged_in_as) %>", result.username]];
+    }
+    else
+    {
+        [[self window] setState:[SessionWindow loginState] andResetFields:NO];
+        [[self window] setCustomError:data];
+        [[self window] update];
+    }
 }
 
 -(void)loginResponseHandler:(int)statusCode forData:(CPString)data
@@ -40,10 +79,12 @@ var session;
     }
     else
     {
+        authToken = "";
         [[self window] setState:[SessionWindow loginState] andResetFields:NO];
         [[self window] setCustomError:data];
         [[self window] update];
     }
+    [self getUserData];
 }
 
 -(void)registerResponseHandler:(int)statusCode forData:(CPString)data
@@ -164,6 +205,15 @@ var session;
 	[self post:"/users/" + aUsername + "/forgotPassword" withData:{/* captcha */} andNotify:self];
 }
 
+-(void)logout
+{
+    CPLog("Logout");
+    currentResponseHandler = @selector(nullResponseHandler:forData:)
+    [self delete:"/sessions/current" andNotify:self];
+    authToken = "";
+    [self getUserData];
+}
+
 -(void)connection:(CPURLConnection)connection didFailWithError:(id)error
 {
     CPLog("Error: %@", error);
@@ -186,6 +236,8 @@ var session;
 
 -(void)connectionDidReceiveAuthenticationChallenge:(id)connection
 {
+    authToken = "";
+    [self getUserData];
     [self showLoginWindow];
     [[self window] setCustomMessage:"<%= t(:login_required) %>"];
     [[self window] update];
@@ -193,8 +245,16 @@ var session;
 
 -(void)showLoginWindow
 {
-    [self showWindow:self];
-    [[self window] setState:[SessionWindow loginState]];
+    if (authToken.length == 0)
+    {
+        [self showWindow:self];
+        [[self window] setState:[SessionWindow loginState]];
+    }
+    else
+    {
+        [self showWindow:self];
+        [[self window] setState:[SessionWindow logoutState]];
+    }
 }
 
 -(void)showChangePasswordWindow
@@ -207,6 +267,12 @@ var session;
 {
     [self loginWithUsername:[[self window] username] andPassword:[[self window] password]];
     [[self window] setState:[SessionWindow waitingState]];
+}
+
+-(id)logoutButtonClicked:(id)sender
+{
+    [self logout];
+    [[self window] close];
 }
 
 -(id)registerButtonClicked:(id)sender
@@ -225,6 +291,13 @@ var session;
 {
     [self changePassword:[[self window] password] forUser:[[self window] username]];
     [[self window] setState:[SessionWindow waitingState]];
+}
+
+
+
+-(SessionMenuItem)sessionStatusMenuItem
+{
+    return statusMenuItem;
 }
 
 +(SessionManager)instance
