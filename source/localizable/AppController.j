@@ -42,12 +42,6 @@
 
     CPLog("hash: " + [HashFragment fragment]);
 
-
-        var button = [CPButton buttonWithTitle:"login"];
-        [button setTarget:self];
-        [button setAction:@selector(login:)];
-        [contentView addSubview:button];
-
         var cpbutton = [CPButton buttonWithTitle:"changepass"];
         [cpbutton setFrameOrigin:CGPointMake(0,20)];
         [cpbutton setTarget:self];

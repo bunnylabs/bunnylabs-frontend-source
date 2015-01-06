@@ -73,7 +73,7 @@ configure :development do
 end
 
 configure :build do
-  set :api_server_url, "http://bunnylabs-app.astrobunny.net"
+  set :api_server_url, "https://bunnylabs-api.astrobunny.net"
 end
 
 # Build-specific configuration
