@@ -19,6 +19,11 @@
     return window.location.hash;
 }
 
++(id)fragmentAsJson
+{
+
+}
+
 @end
 
 @implementation AppController : CPObject
@@ -43,9 +48,9 @@
     CPLog("hash: " + [HashFragment fragment]);
 
 
-        var button = [CPButton buttonWithTitle:"login"];
+        var button = [CPButton buttonWithTitle:"test"];
         [button setTarget:self];
-        [button setAction:@selector(login:)];
+        [button setAction:@selector(test:)];
         [contentView addSubview:button];
 
         var cpbutton = [CPButton buttonWithTitle:"changepass"];
@@ -61,6 +66,11 @@
         [ds setAction:@selector(ds:)];
         [contentView addSubview:ds];
     //[SessionManager instance] 
+}
+
+-(id)test:(id)sender
+{
+    [[SessionManager instance] get:"/admin/usercount" andNotify:self];
 }
 
 -(id)changepass:(id)sender
