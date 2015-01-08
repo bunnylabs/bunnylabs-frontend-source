@@ -33,3 +33,4 @@ jp:
   login_required: "ログインが必要です"
   logged_in_as: "%@さん"
   logout: "ログアウト"
+  unable_to_github_login: "Githubでログインすることできません。原因: %@"

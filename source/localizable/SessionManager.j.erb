@@ -3,8 +3,17 @@
 @import "SessionWindow.j"
 @import "SessionMenuItem.j"
 
+@import "Utils/URLQueryString.j"
+
+var GITHUB_CLIENT_ID = "<%= config[:github_client_id] %>";
 var apiServerUrl = "<%= config[:api_server_url] %>";
 var session;
+
+function popupwindow(url, title, w, h) {
+  var left = (screen.width/2)-(w/2);
+  var top = (screen.height/2)-(h/2);
+  return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+} 
 
 @implementation SessionManager : CPWindowController
 {
@@ -28,8 +37,44 @@ var session;
         statusMenuItem = [[SessionMenuItem alloc] init];
         [statusMenuItem setTarget:self];
         [self getUserData];
+
+        window.addEventListener('message', function (event) {
+            try
+            {
+                var obj = [URLQueryString deserialize:event.data];
+                [self handleSessionManagerMessage:obj];
+            }
+            catch (e)
+            {
+                CPLog("Received bad message");
+            }
+        });
 	}
 	return self;
+}
+
+-(void)handleSessionManagerMessage:(id)anObject
+{
+    console.log(anObject);
+    if (anObject.type === "githubLogin")
+    {
+        if (anObject.authToken)
+        {
+            authToken = anObject.authToken;
+            [self getUserData];
+        }
+        else if (anObject.error)
+        {
+            var alert = [CPAlert alertWithError: [CPString stringWithFormat:"<%= t(:unable_to_github_login) %>", anObject.error]];
+            [alert runModal];
+        }
+        else
+        {
+            console.log("wtf");
+        }
+    }
+
+    // TODO: link accounts
 }
 
 -(id)menuItemClicked:(id)sender
@@ -67,6 +112,21 @@ var session;
         [[self window] setState:[SessionWindow loginState] andResetFields:NO];
         [[self window] setCustomError:data];
         [[self window] update];
+    }
+}
+
+-(void)validationResponseHandler:(int)statusCode forData:(CPString)data
+{
+    if (statusCode == 200)
+    {
+        var alert = [CPAlert alertWithError: [CPString stringWithFormat:"<%= t(:validation_pass) %>"]];
+        [alert setAlertStyle:CPInformationalAlertStyle];
+        [alert runModal];
+    }
+    else
+    {
+        var alert = [CPAlert alertWithError: [CPString stringWithFormat:"<%= t(:validation_fail) %>"]];
+        [alert runModal];
     }
 }
 
@@ -205,6 +265,16 @@ var session;
 	[self post:"/users/" + aUsername + "/forgotPassword" withData:{/* captcha */} andNotify:self];
 }
 
+-(void)validateUser:(CPString)aUsername withToken:(CPString)aToken
+{
+    CPLog("Validating User: %@ %@", aUsername, aToken);
+    currentResponseHandler = @selector(validationResponseHandler:forData:)
+    [self post:"/users/" + aUsername + "/validation" withData:{
+                   name: aUsername,
+        validationToken: aToken
+    } andNotify:self];
+}
+
 -(void)logout
 {
     CPLog("Logout");
@@ -241,6 +311,20 @@ var session;
     [self showLoginWindow];
     [[self window] setCustomMessage:"<%= t(:login_required) %>"];
     [[self window] update];
+}
+
+-(void)loginWithGithub
+{
+    var queryString = [URLQueryString serialize:
+    {
+        client_id: GITHUB_CLIENT_ID,
+            scope: "gist,user:email"
+    }];
+
+    var request = [CPString stringWithFormat:"https://github.com/login/oauth/authorize?%@", queryString];
+
+    popupwindow(request, "asd", 1024, 768);
+
 }
 
 -(void)showLoginWindow

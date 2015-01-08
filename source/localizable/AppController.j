@@ -11,21 +11,7 @@
 
 @import "SessionManager.j"
 
-@import "GithubLoginWindow.j"
-
-@implementation HashFragment : CPObject
-
-+(CPString)fragment
-{
-    return window.location.hash;
-}
-
-+(id)fragmentAsJson
-{
-
-}
-
-@end
+@import "Utils/HashFragment.j"
 
 @implementation AppController : CPObject
 {
@@ -46,7 +32,7 @@
     [self refreshMenu];
     [self setDesktop];
 
-    CPLog("hash: " + [HashFragment fragment]);
+    [self performHash];
 
 
         var button = [CPButton buttonWithTitle:"test"];
@@ -82,8 +68,7 @@
 
 -(id)ghlogin:(id)sender
 {
-    var loginWindow = [[GithubLoginWindow alloc] init];
-    [loginWindow orderFront:self];
+    [[SessionManager instance] loginWithGithub];
 }
 
 -(id)changepass:(id)sender
@@ -94,6 +79,15 @@
 -(id)ds:(id)sender
 {
     [[SessionManager instance] get:"/" andNotify:self];
+}
+
+-(void)performHash
+{
+    var hash = [HashFragment fragmentAsObject];
+    if (hash.validate)
+    {
+        [[SessionManager instance] validateUser:hash.validateUsername withToken:hash.validate];
+    }
 }
 
 -(void)setDesktop
