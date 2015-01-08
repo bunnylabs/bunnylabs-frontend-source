@@ -88,6 +88,10 @@
     {
         [[SessionManager instance] validateUser:hash.validateUsername withToken:hash.validate];
     }
+    if (hash.forgotPassword)
+    {
+        [[SessionManager instance] showChangePasswordWindow];
+    }
 }
 
 -(void)setDesktop

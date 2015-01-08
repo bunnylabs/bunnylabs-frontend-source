@@ -391,10 +391,10 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 		case FORGOTPASSWORD_STATE:
 			message = "<%= t(:forgot_password_screen_message) %>";
 
-			[usernameField setValidator:nil];
+			[usernameField setValidator:@selector(usernameIsValid:)];
 			[passwordField setValidator:nil];
 			[passwordConfirmField setValidator:nil];
-			[emailField setValidator:nil];
+			[emailField setValidator:@selector(emailIsValid:)];
 
 			break;
 

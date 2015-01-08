@@ -3,6 +3,7 @@
 @import "SessionWindow.j"
 @import "SessionMenuItem.j"
 
+@import "Utils/HashFragment.j"
 @import "Utils/URLQueryString.j"
 
 var GITHUB_CLIENT_ID = "<%= config[:github_client_id] %>";
@@ -65,8 +66,9 @@ function popupwindow(url, title, w, h) {
         }
         else if (anObject.error)
         {
-            var alert = [CPAlert alertWithError: [CPString stringWithFormat:"<%= t(:unable_to_github_login) %>", anObject.error]];
-            [alert runModal];
+            [self showLoginWindow];
+            [[self window] setCustomError:[CPString stringWithFormat:"<%= t(:unable_to_github_login) %>", anObject.error]];
+            [[self window] update];
         }
         else
         {
@@ -195,45 +197,49 @@ function popupwindow(url, title, w, h) {
     }
 }
 
+-(CPURL)_buildUrl:(CPString)apiPath
+{
+    var query = {
+        auth: authToken,
+        lang: "<%= I18n.locale %>"
+    };
+
+    var url = [CPURL URLWithString:[CPString stringWithFormat:"%@%@?%@", apiServerUrl, apiPath, [URLQueryString serialize:query]]];
+
+    return url;
+}
+
 -(id)get:(CPString)aUrl andNotify:(id)delegate
 {
-    var url = [CPURL URLWithString: apiServerUrl + aUrl];
+    var url = [self _buildUrl:aUrl];
     var request = [CPURLRequest requestWithURL:url];
     [request setHTTPMethod:"GET"];
-    [request setValue:authToken forHTTPHeaderField:"Authentication-Token"];
-    [request setValue:"<%= I18n.locale %>" forHTTPHeaderField:"Language"];
     var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
 }
 
 -(id)post:(CPString)aUrl withData:(id)json andNotify:(id)delegate
 {
-    var url = [CPURL URLWithString: apiServerUrl + aUrl];
+    var url = [self _buildUrl:aUrl];
     var request = [CPURLRequest requestWithURL:url];
     [request setHTTPMethod:"POST"];
     [request setHTTPBody:JSON.stringify(json)];
-    [request setValue:authToken forHTTPHeaderField:"Authentication-Token"];
-    [request setValue:"<%= I18n.locale %>" forHTTPHeaderField:"Language"];
     var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
 }
 
 -(id)put:(CPString)aUrl withData:(id)json andNotify:(id)delegate
 {
-    var url = [CPURL URLWithString: apiServerUrl + aUrl];
+    var url = [self _buildUrl:aUrl];
     var request = [CPURLRequest requestWithURL:url];
     [request setHTTPMethod:"PUT"];
     [request setHTTPBody:JSON.stringify(json)];
-    [request setValue:authToken forHTTPHeaderField:"Authentication-Token"];
-    [request setValue:"<%= I18n.locale %>" forHTTPHeaderField:"Language"];
     var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
 }
 
 -(id)delete:(CPString)aUrl andNotify:(id)delegate
 {
-    var url = [CPURL URLWithString: apiServerUrl + aUrl];
+    var url = [self _buildUrl:aUrl];
     var request = [CPURLRequest requestWithURL:url];
     [request setHTTPMethod:"DELETE"];
-    [request setValue:authToken forHTTPHeaderField:"Authentication-Token"];
-    [request setValue:"<%= I18n.locale %>" forHTTPHeaderField:"Language"];
     var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
 }
 
@@ -253,16 +259,26 @@ function popupwindow(url, title, w, h) {
 
 -(void)changePassword:(CPString)aPassword forUser:(CPString)aUsername
 {
-    CPLog("ChangePassword: %@ %@", aUsername, aPassword);
+    var hash = [HashFragment fragmentAsObject];
+
+    CPLog("ChangePassword: %@ %@ %@", hash.validateUsername, aPassword, hash.forgotPassword);
     currentResponseHandler = @selector(submitUsernameResponseHandler:forData:)
-	[self put:"/users/" + aUsername withData:{password: aPassword} andNotify:self];
+	[self post:"/users/" + hash.validateUsername + "/password" withData:{
+                    name: hash.validateUsername,
+                password: aPassword,
+         validationToken: hash.forgotPassword
+
+    } andNotify:self];
 }
 
 -(void)requestForgottenPasswordForUser:(CPString)aUsername andEmail:(CPString)anEmail
 {
     CPLog("ForgotPassword: %@ %@", aUsername, anEmail);
     currentResponseHandler = @selector(forgotPasswordResponseHandler:forData:)
-	[self post:"/users/" + aUsername + "/forgotPassword" withData:{/* captcha */} andNotify:self];
+	[self post:"/users/" + aUsername + "/forgotPassword" withData:{
+            name:aUsername,
+           email:anEmail
+    } andNotify:self];
 }
 
 -(void)validateUser:(CPString)aUsername withToken:(CPString)aToken
@@ -376,8 +392,6 @@ function popupwindow(url, title, w, h) {
     [self changePassword:[[self window] password] forUser:[[self window] username]];
     [[self window] setState:[SessionWindow waitingState]];
 }
-
-
 
 -(SessionMenuItem)sessionStatusMenuItem
 {
