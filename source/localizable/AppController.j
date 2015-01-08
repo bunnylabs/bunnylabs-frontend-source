@@ -11,6 +11,7 @@
 
 @import "SessionManager.j"
 
+@import "GithubLoginWindow.j"
 
 @implementation HashFragment : CPObject
 
@@ -53,6 +54,12 @@
         [button setAction:@selector(test:)];
         [contentView addSubview:button];
 
+        var ghlogin = [CPButton buttonWithTitle:"ghlogin"];
+        [ghlogin setFrameOrigin:CGPointMake(0,80)];
+        [ghlogin setTarget:self];
+        [ghlogin setAction:@selector(ghlogin:)];
+        [contentView addSubview:ghlogin];
+
         var cpbutton = [CPButton buttonWithTitle:"changepass"];
         [cpbutton setFrameOrigin:CGPointMake(0,20)];
         [cpbutton setTarget:self];
@@ -71,6 +78,12 @@
 -(id)test:(id)sender
 {
     [[SessionManager instance] get:"/admin/usercount" andNotify:self];
+}
+
+-(id)ghlogin:(id)sender
+{
+    var loginWindow = [[GithubLoginWindow alloc] init];
+    [loginWindow orderFront:self];
 }
 
 -(id)changepass:(id)sender
