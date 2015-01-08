@@ -1,0 +1,49 @@
+@import <Foundation/Foundation.j>
+@import <AppKit/AppKit.j>
+
+@import "Utils/URLQueryString.j"
+
+var GITHUB_CLIENT_ID = "<%= config[:github_client_id] %>";
+
+function popupwindow(url, title, w, h) {
+  var left = (screen.width/2)-(w/2);
+  var top = (screen.height/2)-(h/2);
+  return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
+} 
+
+@implementation GithubLoginWindow : CPWindow
+{
+	CPView contentView;
+	CPWebView webView;
+}
+
+
+-(id)init
+{
+	self = [super init];
+	if (self)
+	{
+		contentView = [self contentView];
+		[self setFrame:CGRectMake(0,0,300,300)];
+		[self center];
+		[self setFrameOrigin:CGPointMake([self frame].origin.x,[self frame].origin.y-50)];
+
+		var queryString = [URLQueryString serialize:
+		{
+			client_id: GITHUB_CLIENT_ID,
+			    scope: "gist,user:email"
+		}];
+
+		var request = [CPString stringWithFormat:"https://github.com/login/oauth/authorize?%@", queryString];
+
+		popupwindow(request, "asd", 1024, 768);
+
+		window.addEventListener('message', function (event) {
+			console.log(event);
+		});
+
+	}
+	return self;
+}
+
+@end
