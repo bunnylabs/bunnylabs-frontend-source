@@ -30,7 +30,34 @@
         <!-- Custom javascript goes here -->
         <!-- End custom javascript -->
 
+        <script type="text/javascript" src="/<%= I18n.locale %>/Resources/scream.min.js"></script>
+
         <script type="text/javascript">
+
+            var scream = gajus.Scream({
+                width: {
+                    portrait: 375,
+                    landscape: 667
+                }
+            });
+
+            function updateViewPort()
+            {
+                var cappBody = document.getElementById("cappuccino-body");
+                if (scream.isMinimalView() || scream.getOrientation() == "portrait")
+                {
+                    cappBody.style.top = "0px";
+                }
+                else
+                {
+                    cappBody.style.top = "55px";
+                }
+
+            }
+
+            scream.on('orientationchangeend', updateViewPort);
+            scream.on('viewchange', updateViewPort);
+
             OBJJ_MAIN_FILE = "/<%= I18n.locale %>/main.j";
 <% if config[:environment] == :development %>
             OBJJ_INCLUDE_PATHS = ["Frameworks/Debug", "Frameworks"];
@@ -116,13 +143,14 @@
             #cappuccino-body {
                 /* Position it absolutely so it will fill the height without content */
                 position: absolute;
-                top: 0;
-                bottom: 0;
+                top: 0px;
+                bottom: 0px;
                 width: 100%;
 
                 /* Put it at the bottom of the stack so it doesn't interfere with UI */
                 z-index: -1000;
             }
+
 
             #cappuccino-body .container {
                 display: table;

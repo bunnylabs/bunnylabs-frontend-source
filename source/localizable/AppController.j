@@ -9,6 +9,7 @@
 @import <Foundation/Foundation.j>
 @import <AppKit/AppKit.j>
 
+@import "DesktopManager.j"
 @import "SessionManager.j"
 
 @import "Utils/HashFragment.j"
@@ -24,6 +25,8 @@
     var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMakeZero() styleMask:CPBorderlessBridgeWindowMask];
     contentView = [theWindow contentView];
 
+    [[DesktopManager instance] setContentView:contentView];
+
     [theWindow setDelegate:self];
     [theWindow orderFront:self];
 
@@ -33,52 +36,6 @@
     [self setDesktop];
 
     [self performHash];
-
-
-        var button = [CPButton buttonWithTitle:"test"];
-        [button setTarget:self];
-        [button setAction:@selector(test:)];
-        [contentView addSubview:button];
-
-        var ghlogin = [CPButton buttonWithTitle:"ghlogin"];
-        [ghlogin setFrameOrigin:CGPointMake(0,80)];
-        [ghlogin setTarget:self];
-        [ghlogin setAction:@selector(ghlogin:)];
-        [contentView addSubview:ghlogin];
-
-        var cpbutton = [CPButton buttonWithTitle:"changepass"];
-        [cpbutton setFrameOrigin:CGPointMake(0,20)];
-        [cpbutton setTarget:self];
-        [cpbutton setAction:@selector(changepass:)];
-        [contentView addSubview:cpbutton];
-
-
-        var ds = [CPButton buttonWithTitle:"dosomething"];
-        [ds setFrameOrigin:CGPointMake(0,50)];
-        [ds setTarget:self];
-        [ds setAction:@selector(ds:)];
-        [contentView addSubview:ds];
-    //[SessionManager instance] 
-}
-
--(id)test:(id)sender
-{
-    [[SessionManager instance] get:"/admin/usercount" andNotify:self];
-}
-
--(id)ghlogin:(id)sender
-{
-    [[SessionManager instance] loginWithGithub];
-}
-
--(id)changepass:(id)sender
-{
-    [[SessionManager instance] showChangePasswordWindow];
-}
-
--(id)ds:(id)sender
-{
-    [[SessionManager instance] get:"/" andNotify:self];
 }
 
 -(void)performHash
@@ -132,6 +89,7 @@
 
 -(void)windowDidResize:(CPNotification)notification
 {
+    [[DesktopManager instance] desktopResized];
     [self refreshMenu];
 }
 
