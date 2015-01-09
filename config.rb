@@ -76,7 +76,7 @@ end
 
 configure :build do
   set :api_server_url, "https://bunnylabs-api.astrobunny.net"
-  set :github_client_id, ""
+  set :github_client_id, "39cee75ce85db5da2576"
 end
 
 # Build-specific configuration
