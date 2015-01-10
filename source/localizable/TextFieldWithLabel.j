@@ -22,6 +22,7 @@
 	if (self)
 	{
 		textField = [CPTextField textFieldWithStringValue:"" placeholder:aPlaceholder width:aWidth - 125];
+		[textField setEditable:YES];
 		[textField setDelegate:self];
 		[textField setSecure:secure];
 		[textField setFrameOrigin:CGPointMake(125,0)];
@@ -34,6 +35,7 @@
 		[self addSubview:label];
 
 		[self setFrame:CGRectMake(0,0,aWidth,[textField bounds].size.height)];
+		[textField setAutoresizingMask:CPViewWidthSizable];
 	}
 
 	return self;

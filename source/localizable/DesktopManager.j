@@ -5,7 +5,8 @@ var desktopInstance;
 
 @implementation DesktopManager : CPObject
 {
-	CPView contentView @accessors;
+	CPView topWindow;
+	CPView contentView;
 	CPView topView;
 }
 
@@ -14,21 +15,32 @@ var desktopInstance;
 	self = [super init];
 	if (self)
 	{
-
+		topWindow = [[CPApplication sharedApplication] mainWindow];
+		contentView = [topWindow contentView];
 	}
 	return self;
 }
 
 -(void)desktopResized
 {
+	[[CPNotificationCenter defaultCenter] postNotificationName:"desktopresize" object:""];
+}
 
+-(void)setDefaultButton:(CPButton)aButton
+{
+	[topWindow setDefaultButton:aButton];
+}
+
+-(CPButton)defaultButton
+{
+	return [topWindow defaultButton];
 }
 
 -(void)setTopView:(CPView)aView
 {
-	while([contentView subViews].length != 0)
+	while([contentView subviews].length != 0)
 	{
-		[[contentView subViews][0] removeFromSuperview];
+		[[contentView subviews][0] removeFromSuperview];
 	}
 
 	[contentView addSubview:aView];

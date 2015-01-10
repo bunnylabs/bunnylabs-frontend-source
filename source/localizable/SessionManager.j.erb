@@ -2,6 +2,7 @@
 
 @import "SessionWindow.j"
 @import "SessionMenuItem.j"
+@import "DesktopManager.j"
 
 @import "Utils/HashFragment.j"
 @import "Utils/URLQueryString.j"
@@ -16,7 +17,7 @@ function popupwindow(url, title, w, h) {
   return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
 } 
 
-@implementation SessionManager : CPWindowController
+@implementation SessionManager : CPViewController
 {
 	CPString authToken;
     SEL currentResponseHandler;
@@ -28,11 +29,12 @@ function popupwindow(url, title, w, h) {
 
 -(id)init
 {
-	self = [super initWithWindow:[[SessionWindow alloc] init]];
+	self = [super init];
 	if (self)
 	{
 		/*persistjs*/
-        [[self window] setDelegate:self];
+        [self setView:[[SessionWindow alloc] init]];
+        [[self view] setDelegate:self];
 		authToken = "";
         currentResponseHandler = @selector(noResponseHandler:data:)
         statusMenuItem = [[SessionMenuItem alloc] init];
@@ -50,8 +52,15 @@ function popupwindow(url, title, w, h) {
                 CPLog("Received bad message");
             }
         });
+
+        [[CPNotificationCenter defaultCenter] addObserver:self selector:@selector(desktopResize:) name:"desktopresize" object:""];
 	}
 	return self;
+}
+
+-(void)desktopResize:(id)something
+{
+    [[self view] updateForScreenWidth:[[[[CPApplication sharedApplication] mainWindow] contentView] bounds].size.width];
 }
 
 -(void)handleSessionManagerMessage:(id)anObject
@@ -67,8 +76,8 @@ function popupwindow(url, title, w, h) {
         else if (anObject.error)
         {
             [self showLoginWindow];
-            [[self window] setCustomError:[CPString stringWithFormat:"<%= t(:unable_to_github_login) %>", anObject.error]];
-            [[self window] update];
+            [[self view] setCustomError:[CPString stringWithFormat:"<%= t(:unable_to_github_login) %>", anObject.error]];
+            [[self view] update];
         }
         else
         {
@@ -111,9 +120,9 @@ function popupwindow(url, title, w, h) {
     }
     else
     {
-        [[self window] setState:[SessionWindow loginState] andResetFields:NO];
-        [[self window] setCustomError:data];
-        [[self window] update];
+        [[self view] setState:[SessionWindow loginState] andResetFields:NO];
+        [[self view] setCustomError:data];
+        [[self view] update];
     }
 }
 
@@ -137,14 +146,14 @@ function popupwindow(url, title, w, h) {
     if (statusCode == 200)
     {
         authToken = data;
-        [[self window] close];
+        [[self view] removeFromSuperview];
     }
     else
     {
         authToken = "";
-        [[self window] setState:[SessionWindow loginState] andResetFields:NO];
-        [[self window] setCustomError:data];
-        [[self window] update];
+        [[self view] setState:[SessionWindow loginState] andResetFields:NO];
+        [[self view] setCustomError:data];
+        [[self view] update];
     }
     [self getUserData];
 }
@@ -153,15 +162,15 @@ function popupwindow(url, title, w, h) {
 {
     if (statusCode == 200)
     {
-        [[self window] setState:[SessionWindow loginState]];
-        [[self window] setCustomMessage:"<%= t(:registration_ok) %>"];
-        [[self window] update];
+        [[self view] setState:[SessionWindow loginState]];
+        [[self view] setCustomMessage:"<%= t(:registration_ok) %>"];
+        [[self view] update];
     }
     else
     {
-        [[self window] setState:[SessionWindow registrationState] andResetFields:NO];
-        [[self window] setCustomError:data];
-        [[self window] update];
+        [[self view] setState:[SessionWindow registrationState] andResetFields:NO];
+        [[self view] setCustomError:data];
+        [[self view] update];
     }
 }
 
@@ -169,15 +178,15 @@ function popupwindow(url, title, w, h) {
 {
     if (statusCode == 200)
     {
-        [[self window] setState:[SessionWindow loginState]];
-        [[self window] setCustomMessage:"<%= t(:change_password_ok) %>"];
-        [[self window] update];
+        [[self view] setState:[SessionWindow loginState]];
+        [[self view] setCustomMessage:"<%= t(:change_password_ok) %>"];
+        [[self view] update];
     }
     else
     {
-        [[self window] setState:[SessionWindow changePasswordState] andResetFields:NO];
-        [[self window] setCustomError:data];
-        [[self window] update];
+        [[self view] setState:[SessionWindow changePasswordState] andResetFields:NO];
+        [[self view] setCustomError:data];
+        [[self view] update];
     }
 }
 
@@ -185,15 +194,15 @@ function popupwindow(url, title, w, h) {
 {
     if (statusCode == 200)
     {
-        [[self window] setState:[SessionWindow loginState]];
-        [[self window] setCustomMessage:"<%= t(:forgot_password_ok) %>"];
-        [[self window] update];
+        [[self view] setState:[SessionWindow loginState]];
+        [[self view] setCustomMessage:"<%= t(:forgot_password_ok) %>"];
+        [[self view] update];
     }
     else
     {
-        [[self window] setState:[SessionWindow forgotPasswordState] andResetFields:NO];
-        [[self window] setCustomError:data];
-        [[self window] update];
+        [[self view] setState:[SessionWindow forgotPasswordState] andResetFields:NO];
+        [[self view] setCustomError:data];
+        [[self view] update];
     }
 }
 
@@ -325,8 +334,8 @@ function popupwindow(url, title, w, h) {
     authToken = "";
     [self getUserData];
     [self showLoginWindow];
-    [[self window] setCustomMessage:"<%= t(:login_required) %>"];
-    [[self window] update];
+    [[self view] setCustomMessage:"<%= t(:login_required) %>"];
+    [[self view] update];
 }
 
 -(void)loginWithGithub
@@ -347,50 +356,50 @@ function popupwindow(url, title, w, h) {
 {
     if (authToken.length == 0)
     {
-        [self showWindow:self];
-        [[self window] setState:[SessionWindow loginState]];
+        [[DesktopManager instance] setTopView:[self view]];
+        [[self view] setState:[SessionWindow loginState]];
     }
     else
     {
-        [self showWindow:self];
-        [[self window] setState:[SessionWindow logoutState]];
+        [[DesktopManager instance] setTopView:[self view]];
+        [[self view] setState:[SessionWindow logoutState]];
     }
 }
 
 -(void)showChangePasswordWindow
 {
-    [self showWindow:self];
-    [[self window] setState:[SessionWindow changePasswordState]];
+    [[DesktopManager instance] setTopView:[self view]];
+    [[self view] setState:[SessionWindow changePasswordState]];
 }
 
 -(id)loginButtonClicked:(id)sender
 {
-    [self loginWithUsername:[[self window] username] andPassword:[[self window] password]];
-    [[self window] setState:[SessionWindow waitingState]];
+    [self loginWithUsername:[[self view] username] andPassword:[[self view] password]];
+    [[self view] setState:[SessionWindow waitingState]];
 }
 
 -(id)logoutButtonClicked:(id)sender
 {
     [self logout];
-    [[self window] close];
+    [[self view] removeFromSuperview];
 }
 
 -(id)registerButtonClicked:(id)sender
 {
-    [self register:[[self window] username] withPassword:[[self window] password] andEmail:[[self window] email]];
-    [[self window] setState:[SessionWindow waitingState]];
+    [self register:[[self view] username] withPassword:[[self view] password] andEmail:[[self view] email]];
+    [[self view] setState:[SessionWindow waitingState]];
 }
 
 -(id)submitUsernameButtonClicked:(id)sender
 {
-    [self requestForgottenPasswordForUser:[[self window] username] andEmail:[[self window] email]];
-    [[self window] setState:[SessionWindow waitingState]];
+    [self requestForgottenPasswordForUser:[[self view] username] andEmail:[[self view] email]];
+    [[self view] setState:[SessionWindow waitingState]];
 }
 
 -(id)changePasswordButtonClicked:(id)sender
 {
-    [self changePassword:[[self window] password] forUser:[[self window] username]];
-    [[self window] setState:[SessionWindow waitingState]];
+    [self changePassword:[[self view] password] forUser:[[self view] username]];
+    [[self view] setState:[SessionWindow waitingState]];
 }
 
 -(SessionMenuItem)sessionStatusMenuItem

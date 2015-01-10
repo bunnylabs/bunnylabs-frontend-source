@@ -25,8 +25,6 @@
     var theWindow = [[CPWindow alloc] initWithContentRect:CGRectMakeZero() styleMask:CPBorderlessBridgeWindowMask];
     contentView = [theWindow contentView];
 
-    [[DesktopManager instance] setContentView:contentView];
-
     [theWindow setDelegate:self];
     [theWindow orderFront:self];
 

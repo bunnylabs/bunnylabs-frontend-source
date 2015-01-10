@@ -14,12 +14,16 @@ var MINIMUM_USERNAME_LENGTH = 4;
 var MINIMUM_PASSWORD_LENGTH = 8;
 var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+var WIDE_MODE_WIDTH = 500;
+var NARROW_MODE_WIDTH = 300;
 
-@implementation SessionWindow : CPPanel
+@implementation SessionWindow : CPBox
 {
-	CPInteger currentState;
+	id delegate @accessors;
+	CPString title @accessors;
+	CPButton defaultButton @accessors;
 
-	CPView contentView;
+	CPInteger currentState;
 
 	CPTextField messageField;
 	CPTextField errorField;
@@ -47,6 +51,8 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 	CPString customMessage @accessors;
 	CPString customError @accessors;
+
+	int LOGIN_BOX_WIDTH;
 }
 
 -(id)init
@@ -57,9 +63,9 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 		errors = [[CPSet alloc] init];
 		customMessage = "";
 		customError = "";
+		LOGIN_BOX_WIDTH = WIDE_MODE_WIDTH;
 
-		contentView = [self contentView];
-		[self setFrame:CGRectMake(0,0,400,100)];
+		[self setFrame:CGRectMake(0,0,LOGIN_BOX_WIDTH,100)];
 		[self center];
 		[self setFrameOrigin:CGPointMake([self frame].origin.x,[self frame].origin.y-50)];
 
@@ -68,102 +74,100 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 		[messageField setLineBreakMode:CPLineBreakByWordWrapping];
 		[messageField setBackgroundColor:[CPColor colorWithCalibratedRed:103.0 / 255.0 green:154.0 / 255.0 blue:205.0 / 255.0 alpha:1.0]];
 		[messageField setTextColor:[CPColor whiteColor]];
-		[messageField setAutoresizingMask: CPViewWidthSizable];
 		[messageField setValue:CGInsetMake(9.0, 9.0, 9.0, 9.0) forThemeAttribute:@"content-inset"];
-		[contentView addSubview:messageField];
+		[self addSubview:messageField];
 
 
 		errorField = [[CPTextField alloc] initWithFrame:CGRectMake(0,0,100,0)];
 		[errorField setLineBreakMode:CPLineBreakByWordWrapping];
 		[errorField setBackgroundColor:[CPColor colorWithHexString:"993333"]];
 		[errorField setTextColor:[CPColor whiteColor]];
-		[errorField setAutoresizingMask: CPViewWidthSizable];
 		[errorField setValue:CGInsetMake(9.0, 9.0, 9.0, 9.0) forThemeAttribute:@"content-inset"];
-		[contentView addSubview:errorField];
+		[self addSubview:errorField];
 
 		loginButton = [CPButton buttonWithTitle:"<%= t(:login) %>"];
 		[loginButton setFrame:CGRectMake(10,180,185,[loginButton bounds].size.height)];
 		[loginButton setTarget:self];
 		[loginButton setAction:@selector(loginButtonClicked:)];
-		[contentView addSubview:loginButton];
+		[self addSubview:loginButton];
 
 		newAccountButton = [CPButton buttonWithTitle:"<%= t(:create_new_account) %>"];
 		[newAccountButton setFrame:CGRectMake(10,180,185,[newAccountButton bounds].size.height)];
 		[newAccountButton setTarget:self];
 		[newAccountButton setAction:@selector(newAccountButtonClicked:)];
-		[contentView addSubview:newAccountButton];
+		[self addSubview:newAccountButton];
 
 		forgotPasswordButton = [CPButton buttonWithTitle:"<%= t(:forgot_password) %>"];
 		[forgotPasswordButton setFrame:CGRectMake(10,180,185,[forgotPasswordButton bounds].size.height)];
 		[forgotPasswordButton setTarget:self];
 		[forgotPasswordButton setAction:@selector(forgotPasswordButtonClicked:)];
-		[contentView addSubview:forgotPasswordButton];
+		[self addSubview:forgotPasswordButton];
 
 		registerButton = [CPButton buttonWithTitle:"<%= t(:confirm_register_details) %>"];
 		[registerButton setFrame:CGRectMake(10,180,185,[registerButton bounds].size.height)];
 		[registerButton setTarget:self];
 		[registerButton setAction:@selector(registerButtonClicked:)];
-		[contentView addSubview:registerButton];
+		[self addSubview:registerButton];
 
 		changePasswordButton = [CPButton buttonWithTitle:"<%= t(:confirm_new_password) %>"];
 		[changePasswordButton setFrame:CGRectMake(10,180,185,[changePasswordButton bounds].size.height)];
 		[changePasswordButton setTarget:self];
 		[changePasswordButton setAction:@selector(changePasswordButtonClicked:)];
-		[contentView addSubview:changePasswordButton];
+		[self addSubview:changePasswordButton];
 
 		submitUsernameButton = [CPButton buttonWithTitle:"<%= t(:send_recovery_email) %>"];
 		[submitUsernameButton setFrame:CGRectMake(10,180,185,[submitUsernameButton bounds].size.height)];
 		[submitUsernameButton setTarget:self];
 		[submitUsernameButton setAction:@selector(submitUsernameButtonClicked:)];
-		[contentView addSubview:submitUsernameButton];
+		[self addSubview:submitUsernameButton];
 
 
 		logoutButton = [CPButton buttonWithTitle:"<%= t(:logout) %>"];
 		[logoutButton setFrame:CGRectMake(10,180,185,[logoutButton bounds].size.height)];
 		[logoutButton setTarget:self];
 		[logoutButton setAction:@selector(logoutButtonClicked:)];
-		[contentView addSubview:logoutButton];
+		[self addSubview:logoutButton];
 
 
 		cancelButton = [CPButton buttonWithTitle:"<%= t(:cancel) %>"];
 		[cancelButton setFrame:CGRectMake(205,180,185,[cancelButton bounds].size.height)];
 		[cancelButton setTarget:self];
 		[cancelButton setAction:@selector(cancelButtonClicked:)];
-		[contentView addSubview:cancelButton];
+		[self addSubview:cancelButton];
 
 
 		usernameField = [[TextFieldWithLabel alloc] initWithLabel:"<%= t(:username) %>:" 
 													   andPlaceHolder:"<%= t(:username) %>" 
-															 andWidth:380];
+															 andWidth:LOGIN_BOX_WIDTH - 20];
 		[usernameField setFrameOrigin:CGPointMake(10,20)];
 		[usernameField setTarget:self];
 		[usernameField setTextChangedSelector:@selector(textChanged:)];
-		[contentView addSubview:usernameField];
+		[self addSubview:usernameField];
 
 		passwordField = [[TextFieldWithLabel alloc] initWithLabel:"<%= t(:password) %>:" 
 													   andPlaceHolder:"<%= t(:password) %>" 
-															 andWidth:380 
+															 andWidth:LOGIN_BOX_WIDTH - 20 
 															 isSecure:YES];
 		[passwordField setFrameOrigin:CGPointMake(10,50)];
 		[passwordField setTarget:self];
 		[passwordField setTextChangedSelector:@selector(textChanged:)];
-		[contentView addSubview:passwordField];
+		[self addSubview:passwordField];
 
 		passwordConfirmField = [[TextFieldWithLabel alloc] initWithLabel:"<%= t(:password_again) %>:" 
 															  andPlaceHolder:"<%= t(:password_again) %>" 
-																	andWidth:380 isSecure:YES];
+																	andWidth:LOGIN_BOX_WIDTH - 20 isSecure:YES];
 		[passwordConfirmField setFrameOrigin:CGPointMake(10,80)];
 		[passwordConfirmField setTarget:self];
 		[passwordConfirmField setTextChangedSelector:@selector(textChanged:)];
-		[contentView addSubview:passwordConfirmField];
+		[self addSubview:passwordConfirmField];
 
 		emailField = [[TextFieldWithLabel alloc] initWithLabel:"<%= t(:email) %>:" 
 													andPlaceHolder:"<%= t(:email) %>" 
-														  andWidth:380];
+														  andWidth:LOGIN_BOX_WIDTH - 20];
 		[emailField setFrameOrigin:CGPointMake(10,110)];
 		[emailField setTarget:self];
 		[emailField setTextChangedSelector:@selector(textChanged:)];
-		[contentView addSubview:emailField];
+		[self addSubview:emailField];
 
 		var spinner = [[CPImage alloc] initWithContentsOfFile:
 				[[CPBundle mainBundle] pathForResource:"spinner.gif"]
@@ -173,9 +177,9 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 		spinnerView = [[CPImageView alloc] init];
 		[spinnerView setImage:spinner];
 		[spinnerView setHidden:YES];
-		[spinnerView setFrame:CGRectMake(400,400,60,60)];
+		[spinnerView setFrame:CGRectMake(LOGIN_BOX_WIDTH,400,60,60)];
 
-		[contentView addSubview:spinnerView];
+		[self addSubview:spinnerView];
 
 		messageSize = 0;
 
@@ -184,6 +188,42 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 		[self setState:LOGIN_STATE];
 	}
 	return self;
+}
+
+-(void)updateForScreenWidth:(int)width
+{
+
+	if ( width < WIDE_MODE_WIDTH )
+	{
+		LOGIN_BOX_WIDTH = NARROW_MODE_WIDTH;
+	}
+	else
+	{
+		LOGIN_BOX_WIDTH = WIDE_MODE_WIDTH;
+	}
+
+	[usernameField setFrame:CGRectMake([usernameField frame].origin.x,
+										[usernameField frame].origin.y,
+										LOGIN_BOX_WIDTH - 20,
+										[usernameField frame].size.height)];
+
+	[passwordField setFrame:CGRectMake([passwordField frame].origin.x,
+										[passwordField frame].origin.y,
+										LOGIN_BOX_WIDTH - 20,
+										[passwordField frame].size.height)];
+
+	[passwordConfirmField setFrame:CGRectMake([passwordConfirmField frame].origin.x,
+										[passwordConfirmField frame].origin.y,
+										LOGIN_BOX_WIDTH - 20,
+										[passwordConfirmField frame].size.height)];
+
+	[emailField setFrame:CGRectMake([emailField frame].origin.x,
+										[emailField frame].origin.y,
+										LOGIN_BOX_WIDTH - 20,
+										[emailField frame].size.height)];
+
+	[self _update];
+
 }
 
 -(CPString)username
@@ -248,7 +288,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 -(id)cancelButtonClicked:(id)sender
 {
-	[self close];
+	[self removeFromSuperview];
 	return sender;
 }
 
@@ -446,7 +486,6 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 -(void)_update
 {
-
 	[usernameField validate];
 	[passwordField validate];
 	[passwordConfirmField validate];
@@ -481,26 +520,27 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 	var targetWidth = [self frame].size.width;
 	var targetHeight = [self frame].size.height;
 
-	var messageFieldSize = {width: [messageField frame].size.width, height: 0};
+	var messageFieldSize = {width: LOGIN_BOX_WIDTH, height: 0};
 	if (messageString && messageString.length > 0)
 	{
-		messageFieldSize = [messageString sizeWithFont:[messageField font] inWidth:400];
-		[messageField setFrame:CGRectMake(0, 0, messageFieldSize.width, messageFieldSize.height + 18)];
+		messageFieldSize = [messageString sizeWithFont:[messageField font] inWidth:LOGIN_BOX_WIDTH];
+		[messageField setFrame:CGRectMake(0, 0, LOGIN_BOX_WIDTH, messageFieldSize.height + 18)];
 	}
 	else
 	{
-		[messageField setFrame:CGRectMake(0, 0, messageFieldSize.width, 0)];
+		[messageField setFrame:CGRectMake(0, 0, LOGIN_BOX_WIDTH, 0)];
 	}
 
-	var errorFieldSize = {width: [errorField frame].size.width, height: 0};
+	var errorFieldSize = {width: LOGIN_BOX_WIDTH, height: 0};
 	if ([errorField stringValue] && [errorField stringValue].length > 0)
 	{
-		errorFieldSize = [[errorField stringValue] sizeWithFont:[errorField font] inWidth:400];
-		[errorField setFrame:CGRectMake(0, [messageField frame].size.height, errorFieldSize.width, errorFieldSize.height + 18)];
+		errorFieldSize = [[errorField stringValue] sizeWithFont:[errorField font] inWidth:LOGIN_BOX_WIDTH];
+
+		[errorField setFrame:CGRectMake(0, [messageField frame].size.height, LOGIN_BOX_WIDTH, errorFieldSize.height + 18)];
 	}
 	else
 	{
-		[errorField setFrame:CGRectMake(0, [messageField frame].size.height, errorFieldSize.width, 0)];
+		[errorField setFrame:CGRectMake(0, [messageField frame].size.height, LOGIN_BOX_WIDTH, 0)];
 	}
 
 	messageSize = [messageField frame].size.height + [errorField frame].size.height;
@@ -528,17 +568,17 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[usernameField setFrameOrigin:CGPointMake(10,10 + messageSize)];
 			[passwordField setFrameOrigin:CGPointMake(10,40 + messageSize)];
 
-			[loginButton setFrame:CGRectMake(10, 80 + messageSize,185, [loginButton bounds].size.height)];
-			[cancelButton setFrame:CGRectMake(205, 80 + messageSize,185, [cancelButton bounds].size.height)];
+			[loginButton setFrame:CGRectMake(10, 80 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
+			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 80 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
-			[newAccountButton setFrame:CGRectMake(10, 110 + messageSize,185, [loginButton bounds].size.height)];
-			[forgotPasswordButton setFrame:CGRectMake(205, 110 + messageSize,185, [cancelButton bounds].size.height)];
+			[newAccountButton setFrame:CGRectMake(10, 110 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
+			[forgotPasswordButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 110 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
 
 			[self setDefaultButton: loginButton];
 
-			targetWidth = 400;
-			targetHeight = 180 + messageSize;
+			targetWidth = LOGIN_BOX_WIDTH;
+			targetHeight = 145 + messageSize;
 
 			break;
 
@@ -566,14 +606,14 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[passwordConfirmField setFrameOrigin:CGPointMake(10,70 + messageSize)];
 			[emailField setFrameOrigin:CGPointMake(10,100 + messageSize)];
 
-			[registerButton setFrame:CGRectMake(10, 140 + messageSize,185, [loginButton bounds].size.height)];
-			[cancelButton setFrame:CGRectMake(205, 140 + messageSize,185, [cancelButton bounds].size.height)];
+			[registerButton setFrame:CGRectMake(10, 140 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
+			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 140 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
 			[self setDefaultButton: registerButton];
 
 
-			targetWidth = 400;
-			targetHeight = 210 + messageSize;
+			targetWidth = LOGIN_BOX_WIDTH;
+			targetHeight = 175 + messageSize;
 
 			break;
 
@@ -598,14 +638,14 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[usernameField setFrameOrigin:CGPointMake(10,10 + messageSize)];
 			[emailField setFrameOrigin:CGPointMake(10,40 + messageSize)];
 
-			[submitUsernameButton setFrame:CGRectMake(10, 80 + messageSize,185, [loginButton bounds].size.height)];
-			[cancelButton setFrame:CGRectMake(205, 80 + messageSize,185, [cancelButton bounds].size.height)];
+			[submitUsernameButton setFrame:CGRectMake(10, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
+			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
 			[self setDefaultButton: submitUsernameButton];
 
 
-			targetWidth = 400;
-			targetHeight = 150 + messageSize;
+			targetWidth = LOGIN_BOX_WIDTH;
+			targetHeight = 115 + messageSize;
 
 			break;
 
@@ -630,13 +670,13 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[passwordField setFrameOrigin:CGPointMake(10,10 + messageSize)];
 			[passwordConfirmField setFrameOrigin:CGPointMake(10,40 + messageSize)];
 
-			[changePasswordButton setFrame:CGRectMake(10, 80 + messageSize,185, [loginButton bounds].size.height)];
-			[cancelButton setFrame:CGRectMake(205, 80 + messageSize,185, [cancelButton bounds].size.height)];
+			[changePasswordButton setFrame:CGRectMake(10, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
+			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
 			[self setDefaultButton: changePasswordButton];
 
-			targetWidth = 400;
-			targetHeight = 150 + messageSize;
+			targetWidth = LOGIN_BOX_WIDTH;
+			targetHeight = 115 + messageSize;
 
 			break;
 
@@ -658,13 +698,13 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 			[spinnerView setHidden:YES];
 			[logoutButton setHidden:NO];
 
-			[logoutButton setFrame:CGRectMake(10, 20 + messageSize, 185, [logoutButton bounds].size.height)];
-			[cancelButton setFrame:CGRectMake(205, 20 + messageSize, 185, [cancelButton bounds].size.height)];
+			[logoutButton setFrame:CGRectMake(10, 20 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [logoutButton bounds].size.height)];
+			[cancelButton setFrame:CGRectMake(205, 20 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
 			[self setDefaultButton: logoutButton];
 
-			targetWidth = 400;
-			targetHeight = 100 + messageSize;
+			targetWidth = LOGIN_BOX_WIDTH;
+			targetHeight = 65 + messageSize;
 
 			break;
 
@@ -688,8 +728,8 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 
 			[spinnerView setFrameOrigin:CGPointMake(170, 30 + messageSize)];
 
-			targetWidth = 400;
-			targetHeight = 150 + messageSize;
+			targetWidth = LOGIN_BOX_WIDTH;
+			targetHeight = 115 + messageSize;
 
 			break;
 	}
@@ -706,9 +746,7 @@ var EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"
 		[[self defaultButton] setEnabled:YES];
 	}
 
-	[self setFrame:CGRectMake([self frame].origin.x - xmargins, [self frame].origin.y - ymargins, targetWidth, targetHeight) 
-			display:YES 
-			animate:YES];
+	[self setFrame:CGRectMake([self frame].origin.x - xmargins, [self frame].origin.y - ymargins, targetWidth, targetHeight)];
 }
 
 -(CPInteger)state
