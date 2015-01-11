@@ -3,7 +3,7 @@
 
 @implementation TextFieldWithLabel : CPView
 {
-	CPTextField textField;
+	CPTextField textField @accessors;
 	CPTextField label;
 
 	id target @accessors;

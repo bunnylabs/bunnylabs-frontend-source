@@ -72,11 +72,13 @@ set :capp_tag_elements, true
 configure :development do
   set :api_server_url, "http://localhost:9292"
   set :github_client_id, "846f90c1b0e633dad4e8"
+  set :persistent_store_name, "BunnyLabs Development"
 end
 
 configure :build do
   set :api_server_url, "https://bunnylabs-api.astrobunny.net"
   set :github_client_id, "39cee75ce85db5da2576"
+  set :persistent_store_name, "BunnyLabs"
 end
 
 # Build-specific configuration

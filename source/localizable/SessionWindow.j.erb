@@ -580,6 +580,8 @@ var NARROW_MODE_WIDTH = 300;
 			[newAccountButton setFrame:CGRectMake(10, 110 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
 			[forgotPasswordButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 110 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
+			[[usernameField textField] setNextKeyView:[passwordField textField]];
+			[[passwordField textField] setNextKeyView:[usernameField textField]];
 
 			[[self window] setDefaultButton: loginButton];
 
@@ -611,6 +613,12 @@ var NARROW_MODE_WIDTH = 300;
 
 			[passwordConfirmField setFrameOrigin:CGPointMake(10,70 + messageSize)];
 			[emailField setFrameOrigin:CGPointMake(10,100 + messageSize)];
+
+
+			[[usernameField textField] setNextKeyView:[passwordField textField]];
+			[[passwordField textField] setNextKeyView:[passwordConfirmField textField]];
+			[[passwordConfirmField textField] setNextKeyView:[emailField textField]];
+			[[emailField textField] setNextKeyView:[usernameField textField]];
 
 			[registerButton setFrame:CGRectMake(10, 140 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
 			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 140 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
@@ -647,6 +655,9 @@ var NARROW_MODE_WIDTH = 300;
 			[submitUsernameButton setFrame:CGRectMake(10, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
 			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
+			[[usernameField textField] setNextKeyView:[emailField textField]];
+			[[emailField textField] setNextKeyView:[usernameField textField]];
+
 			[[self window] setDefaultButton: submitUsernameButton];
 
 
@@ -679,6 +690,9 @@ var NARROW_MODE_WIDTH = 300;
 			[changePasswordButton setFrame:CGRectMake(10, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
 			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
+			[[passwordField textField] setNextKeyView:[passwordConfirmField textField]];
+			[[passwordConfirmField textField] setNextKeyView:[passwordField textField]];
+			
 			[[self window] setDefaultButton: changePasswordButton];
 
 			targetWidth = LOGIN_BOX_WIDTH;
@@ -705,7 +719,7 @@ var NARROW_MODE_WIDTH = 300;
 			[logoutButton setHidden:NO];
 
 			[logoutButton setFrame:CGRectMake(10, 20 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [logoutButton bounds].size.height)];
-			[cancelButton setFrame:CGRectMake(205, 20 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
+			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 20 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
 			[[self window] setDefaultButton: logoutButton];
 

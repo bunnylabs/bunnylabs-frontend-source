@@ -29,12 +29,11 @@
         <title><%= config[:title] %></title>
 
         <!-- Custom javascript goes here -->
-        <!-- End custom javascript -->
 
+        <script type="text/javascript" src="/<%= I18n.locale %>/Resources/persist-all-min.js"></script>
         <script type="text/javascript" src="/<%= I18n.locale %>/Resources/scream.min.js"></script>
 
         <script type="text/javascript">
-
             var scream = gajus.Scream({
                 width: {
                     portrait: screen.width,
@@ -58,6 +57,12 @@
 
             scream.on('orientationchangeend', updateViewPort);
             scream.on('viewchange', updateViewPort);
+
+        </script>
+
+        <!-- End custom javascript -->
+
+        <script type="text/javascript">
 
             OBJJ_MAIN_FILE = "/<%= I18n.locale %>/main.j";
 <% if config[:environment] == :development %>

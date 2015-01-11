@@ -11,31 +11,40 @@ var GITHUB_CLIENT_ID = "<%= config[:github_client_id] %>";
 var apiServerUrl = "<%= config[:api_server_url] %>";
 var session;
 
+NOTIFICATION_LOGIN_DATA_UPDATED = "NOTIFICATION_LOGIN_DATA_UPDATED";
+
 function popupwindow(url, title, w, h) {
   var left = (screen.width/2)-(w/2);
   var top = (screen.height/2)-(h/2);
   return window.open(url, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
-} 
+}
 
 @implementation SessionManager : CPViewController
 {
-	CPString authToken;
     SEL currentResponseHandler;
     int currentStatusCode;
     CPString currentData;
 
     SessionMenuItem statusMenuItem;
+
+    id userData;
+    id persistentStore;
 }
+
+-(BOOL)acceptsFirstResponder
+{
+    return YES;
+}
+
 
 -(id)init
 {
 	self = [super init];
 	if (self)
 	{
-		/*persistjs*/
+        persistentStore = new Persist.Store("<%= config[:persistent_store_name] %>");
         [self setView:[[SessionWindow alloc] init]];
         [[self view] setDelegate:self];
-		authToken = "";
         currentResponseHandler = @selector(noResponseHandler:data:)
         statusMenuItem = [[SessionMenuItem alloc] init];
         [statusMenuItem setTarget:self];
@@ -56,6 +65,26 @@ function popupwindow(url, title, w, h) {
 	return self;
 }
 
+-(CPString)authToken
+{
+    var token = persistentStore.get("authToken");
+    if (!token)
+    {
+        return "";
+    }
+    return token;
+}
+
+-(void)setAuthToken:(CPString)aToken
+{
+    persistentStore.set("authToken", aToken);
+}
+
+-(void)clearAuthToken
+{
+    persistentStore.set("authToken", "");
+}
+
 -(void)desktopDidResizeToRect:(CGRect)newRect
 {
     [[self view] updateForScreenWidth:newRect.size.width];
@@ -68,7 +97,7 @@ function popupwindow(url, title, w, h) {
     {
         if (anObject.authToken)
         {
-            authToken = anObject.authToken;
+            [self setAuthToken:anObject.authToken];
             [self getUserData];
         }
         else if (anObject.error)
@@ -94,19 +123,52 @@ function popupwindow(url, title, w, h) {
 
 -(void)getUserData
 {
-    if (authToken.length > 0)
+    if ([self authToken].length > 0)
     {
         currentResponseHandler = @selector(getUserDataHandler:forData:);
         [self get:"/sessions/current" andNotify:self];
     }
     else
     {
+        userData = nil;
         [statusMenuItem setTitle:"<%= t(:login) %>"];
+        [[CPNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_LOGIN_DATA_UPDATED object:self];
     }
+}
+
+-(BOOL)isAdmin
+{
+    if (!userData)
+    {
+        return NO;
+    }
+
+    if (!userData.adminToken)
+    {
+        return NO;
+    }
+
+    return YES;
+}
+
+-(BOOL)isLoggedIn
+{
+    if (!userData)
+    {
+        return NO;
+    }
+
+    if (!userData.username)
+    {
+        return NO;
+    }
+
+    return YES;
 }
 
 -(void)nullResponseHandler:(int)statusCode forData:(CPString)data
 {
+    CPLog("Null response handler called");
 }
 
 -(void)getUserDataHandler:(int)statusCode forData:(CPString)data
@@ -115,13 +177,17 @@ function popupwindow(url, title, w, h) {
     {
         var result = JSON.parse(data);
         [statusMenuItem setTitle:[CPString stringWithFormat:"<%= t(:logged_in_as) %>", result.username]];
+        userData = result;
     }
     else
     {
         [[self view] setState:[SessionWindow loginState] andResetFields:NO];
         [[self view] setCustomError:data];
         [[self view] update];
+        userData = nil;
     }
+
+    [[CPNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_LOGIN_DATA_UPDATED object:self];
 }
 
 -(void)validationResponseHandler:(int)statusCode forData:(CPString)data
@@ -143,12 +209,12 @@ function popupwindow(url, title, w, h) {
 {
     if (statusCode == 200)
     {
-        authToken = data;
+        [self setAuthToken:data];
         [[DesktopManager instance] removeViewController:self];
     }
     else
     {
-        authToken = "";
+        [self clearAuthToken];
         [[self view] setState:[SessionWindow loginState] andResetFields:NO];
         [[self view] setCustomError:data];
         [[self view] update];
@@ -207,7 +273,7 @@ function popupwindow(url, title, w, h) {
 -(CPURL)_buildUrl:(CPString)apiPath
 {
     var query = {
-        auth: authToken,
+        auth: [self authToken],
         lang: "<%= I18n.locale %>"
     };
 
@@ -310,7 +376,7 @@ function popupwindow(url, title, w, h) {
     CPLog("Logout");
     currentResponseHandler = @selector(nullResponseHandler:forData:)
     [self delete:"/sessions/current" andNotify:self];
-    authToken = "";
+    [self clearAuthToken];
     [self getUserData];
 }
 
@@ -341,7 +407,7 @@ function popupwindow(url, title, w, h) {
 
 -(void)connectionDidReceiveAuthenticationChallenge:(id)connection
 {
-    authToken = "";
+    [self clearAuthToken];
     [self getUserData];
     [self showLoginWindow];
     [[self view] setCustomMessage:"<%= t(:login_required) %>"];
@@ -364,7 +430,7 @@ function popupwindow(url, title, w, h) {
 
 -(void)showLoginWindow
 {
-    if (authToken.length == 0)
+    if ([self authToken].length == 0)
     {
         [[DesktopManager instance] pushTopViewController:self];
         [[self view] setState:[SessionWindow loginState]];
