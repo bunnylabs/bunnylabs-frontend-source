@@ -24,9 +24,16 @@ var instance;
 													 name:NOTIFICATION_LOGIN_DATA_UPDATED 
 												   object:nil];
 
-		adminItem = [[CPMenuItem alloc] initWithTitle:"Admin" action:nil keyEquivalent:nil];
+		adminItem = [[CPMenuItem alloc] initWithTitle:"Admin" action:@selector(menuItemClicked:) keyEquivalent:nil];
+		[adminItem setTarget:self];
 	}
 	return self;
+}
+
+-(id)menuItemClicked:(id)sender
+{
+	[[DesktopManager instance] pushTopViewController:controller];
+	return sender;
 }
 
 -(void)loginStateChanged

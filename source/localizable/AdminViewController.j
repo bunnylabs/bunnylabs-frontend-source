@@ -18,4 +18,9 @@
 	return self;
 }
 
+-(BOOL)viewFillsDesktop
+{
+    return YES;
+}
+
 @end

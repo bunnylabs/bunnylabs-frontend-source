@@ -20,6 +20,61 @@
 
 @import "Utils/HashFragment.j"
 
+
+@implementation MyWebView : CPView
+{
+    id _iframe;
+}
+
+-(id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self)
+    {
+        _iframe = document.createElement("iframe");
+        _iframe.name = "iframe_" + FLOOR(RAND() * 10000);
+        _iframe.style.width = "100%";
+        _iframe.style.height = "100%";
+        _iframe.style.borderWidth = "0px";
+        _iframe.frameBorder = "0";
+
+        _DOMElement.appendChild(_iframe)
+    }
+    return self;
+}
+
+-(void)setMainFrameURL:(CPString)aUrl
+{
+    _iframe.src = aUrl;
+}
+
+@end
+
+@implementation BlogViewController : CPViewController
+
+-(id)init
+{
+    self = [super init];
+    if (self)
+    {
+        var view = [[MyWebView alloc] initWithFrame:CGRectMake(0,0,100,100)];
+        [view setMainFrameURL:"https://blog.davidsiaw.net"];
+        [view setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
+
+        [self setView:view];
+    }
+    return self;
+}
+
+-(BOOL)viewFillsDesktop
+{
+    return YES;
+}
+
+@end
+
+
+
 @implementation AppController : CPObject
 {
     CPView contentView;
