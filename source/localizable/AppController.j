@@ -11,12 +11,39 @@
 
 @import "DesktopManager.j"
 @import "SessionManager.j"
+@import "MenuManager.j"
 
 @import "Utils/HashFragment.j"
 
+@implementation BunnyLabsIcon : CPViewController
+
+-(id)init
+{
+    self = [super init];
+    if (self)
+    {
+        var bundle = [CPBundle mainBundle];
+        var file = [bundle pathForResource:@"Images/bunnylabs.png"];
+
+        var image = [[CPImage alloc] initWithContentsOfFile:file];
+
+        var imageView = [[CPImageView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
+
+        [imageView setImage:image];
+        [imageView setAutoresizingMask: CPViewMinXMargin |
+                                        CPViewMaxXMargin |
+                                        CPViewMinYMargin |
+                                        CPViewMaxYMargin];
+
+        [self setView:imageView];
+    }
+    return self;
+}
+
+@end
+
 @implementation AppController : CPObject
 {
-    CPMenu mainMenu;
     CPView contentView;
 }
 
@@ -29,9 +56,9 @@
     [theWindow orderFront:self];
 
     [CPMenu setMenuBarVisible:YES];
+    [[DesktopManager instance] pushTopViewController:[[BunnyLabsIcon alloc] init]];
 
-    [self refreshMenu];
-    [self setDesktop];
+    [[MenuManager instance] rightStack].push([[SessionManager instance] sessionStatusMenuItem]);
 
     [self performHash];
 }
@@ -49,46 +76,9 @@
     }
 }
 
--(void)setDesktop
-{
-
-    var bundle = [CPBundle mainBundle];
-    var file = [bundle pathForResource:@"Images/bunnylabs.png"];
-
-    var image = [[CPImage alloc] initWithContentsOfFile:file];
-
-    var imageView = [[CPImageView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
-
-    [imageView setImage:image];
-    [imageView setAutoresizingMask: CPViewMinXMargin |
-                                    CPViewMaxXMargin |
-                                    CPViewMinYMargin |
-                                    CPViewMaxYMargin];
-    [imageView setCenter:[contentView center]];
-
-    [contentView addSubview:imageView];
-}
-
--(void)refreshMenu
-{
-    mainMenu = [[CPApplication sharedApplication] mainMenu];
-
-    while ([mainMenu countOfItems] > 0)
-    {
-        [mainMenu removeItemAtIndex:0];
-    }
-
-    [mainMenu removeAllItems];
-
-    [mainMenu addItem:[CPMenuItem separatorItem]];
-    [mainMenu addItem:[CPMenuItem separatorItem]];
-    [mainMenu addItem:[[SessionManager instance] sessionStatusMenuItem]];
-}
-
 -(void)windowDidResize:(CPNotification)notification
 {
     [[DesktopManager instance] desktopResized];
-    [self refreshMenu];
 }
 
 @end

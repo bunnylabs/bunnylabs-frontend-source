@@ -36,3 +36,4 @@ en:
   unable_to_github_login: "Unable to login using Github. Reason: %@"
   validation_pass: "Your account is now validated. You may log in now."
   validation_fail: "Something went wrong. Maybe you already validated."
+  internal_server_error: "Some weird internal error happened."

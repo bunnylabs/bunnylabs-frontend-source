@@ -34,3 +34,4 @@ jp:
   logged_in_as: "%@さん"
   logout: "ログアウト"
   unable_to_github_login: "Githubでログインすることできません。原因: %@"
+  internal_server_error: "エラーが発生しました"

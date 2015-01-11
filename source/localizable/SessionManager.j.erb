@@ -52,15 +52,13 @@ function popupwindow(url, title, w, h) {
                 CPLog("Received bad message");
             }
         });
-
-        [[CPNotificationCenter defaultCenter] addObserver:self selector:@selector(desktopResize:) name:"desktopresize" object:""];
 	}
 	return self;
 }
 
--(void)desktopResize:(id)something
+-(void)desktopDidResizeToRect:(CGRect)newRect
 {
-    [[self view] updateForScreenWidth:[[[[CPApplication sharedApplication] mainWindow] contentView] bounds].size.width];
+    [[self view] updateForScreenWidth:newRect.size.width];
 }
 
 -(void)handleSessionManagerMessage:(id)anObject
@@ -146,7 +144,7 @@ function popupwindow(url, title, w, h) {
     if (statusCode == 200)
     {
         authToken = data;
-        [[self view] removeFromSuperview];
+        [[DesktopManager instance] removeViewController:self];
     }
     else
     {
@@ -218,12 +216,18 @@ function popupwindow(url, title, w, h) {
     return url;
 }
 
+-(void)_performRequest:(CPURLRequest)aRequest withDelegate:(id)delegate
+{
+    var conn = [[CPURLConnection alloc] initWithRequest:aRequest delegate:delegate];
+    [conn start];
+}
+
 -(id)get:(CPString)aUrl andNotify:(id)delegate
 {
     var url = [self _buildUrl:aUrl];
     var request = [CPURLRequest requestWithURL:url];
     [request setHTTPMethod:"GET"];
-    var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
+    [self _performRequest:request withDelegate:delegate];
 }
 
 -(id)post:(CPString)aUrl withData:(id)json andNotify:(id)delegate
@@ -232,7 +236,7 @@ function popupwindow(url, title, w, h) {
     var request = [CPURLRequest requestWithURL:url];
     [request setHTTPMethod:"POST"];
     [request setHTTPBody:JSON.stringify(json)];
-    var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
+    [self _performRequest:request withDelegate:delegate];
 }
 
 -(id)put:(CPString)aUrl withData:(id)json andNotify:(id)delegate
@@ -241,7 +245,7 @@ function popupwindow(url, title, w, h) {
     var request = [CPURLRequest requestWithURL:url];
     [request setHTTPMethod:"PUT"];
     [request setHTTPBody:JSON.stringify(json)];
-    var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
+    [self _performRequest:request withDelegate:delegate];
 }
 
 -(id)delete:(CPString)aUrl andNotify:(id)delegate
@@ -249,7 +253,7 @@ function popupwindow(url, title, w, h) {
     var url = [self _buildUrl:aUrl];
     var request = [CPURLRequest requestWithURL:url];
     [request setHTTPMethod:"DELETE"];
-    var conn = [CPURLConnection connectionWithRequest:request delegate:delegate];
+    [self _performRequest:request withDelegate:delegate];
 }
 
 -(void)loginWithUsername:(CPString)aUsername andPassword:(CPString)aPassword
@@ -298,6 +302,7 @@ function popupwindow(url, title, w, h) {
                    name: aUsername,
         validationToken: aToken
     } andNotify:self];
+    [HashFragment clearFragment];
 }
 
 -(void)logout
@@ -326,6 +331,11 @@ function popupwindow(url, title, w, h) {
 
 -(void)connectionDidFinishLoading:(CPURLConnection)connection
 {
+    // hold down errors
+    if (currentData.length > 200)
+    {
+        currentData = "<%= t(:internal_server_error) %>";
+    }
     [self performSelector:currentResponseHandler withObject:currentStatusCode withObject:currentData];
 }
 
@@ -356,20 +366,26 @@ function popupwindow(url, title, w, h) {
 {
     if (authToken.length == 0)
     {
-        [[DesktopManager instance] setTopView:[self view]];
+        [[DesktopManager instance] pushTopViewController:self];
         [[self view] setState:[SessionWindow loginState]];
     }
     else
     {
-        [[DesktopManager instance] setTopView:[self view]];
+        [[DesktopManager instance] pushTopViewController:self];
         [[self view] setState:[SessionWindow logoutState]];
     }
 }
 
 -(void)showChangePasswordWindow
 {
-    [[DesktopManager instance] setTopView:[self view]];
+    [[DesktopManager instance] pushTopViewController:self];
     [[self view] setState:[SessionWindow changePasswordState]];
+    [HashFragment clearFragment];
+}
+
+-(id)cancelButtonClicked:(id)sender
+{
+    [[DesktopManager instance] removeViewController:self];
 }
 
 -(id)loginButtonClicked:(id)sender
@@ -381,7 +397,7 @@ function popupwindow(url, title, w, h) {
 -(id)logoutButtonClicked:(id)sender
 {
     [self logout];
-    [[self view] removeFromSuperview];
+    [[DesktopManager instance] removeViewController:self];
 }
 
 -(id)registerButtonClicked:(id)sender

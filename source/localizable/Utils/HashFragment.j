@@ -13,4 +13,9 @@
     return [URLQueryString deserialize:window.location.hash.substring(1)];
 }
 
++(void)clearFragment
+{
+	window.location.hash = "";
+}
+
 @end

@@ -21,7 +21,6 @@ var NARROW_MODE_WIDTH = 300;
 {
 	id delegate @accessors;
 	CPString title @accessors;
-	CPButton defaultButton @accessors;
 
 	CPInteger currentState;
 
@@ -183,6 +182,10 @@ var NARROW_MODE_WIDTH = 300;
 
 		messageSize = 0;
 
+		[self setAutoresizingMask: CPViewMinXMargin |
+									CPViewMaxXMargin |
+									CPViewMinYMargin |
+									CPViewMaxYMargin];
 
 
 		[self setState:LOGIN_STATE];
@@ -288,7 +291,10 @@ var NARROW_MODE_WIDTH = 300;
 
 -(id)cancelButtonClicked:(id)sender
 {
-	[self removeFromSuperview];
+	if ([[self delegate] respondsToSelector:@selector(cancelButtonClicked:)])
+	{
+		[[self delegate] cancelButtonClicked:self];
+	}
 	return sender;
 }
 
@@ -575,7 +581,7 @@ var NARROW_MODE_WIDTH = 300;
 			[forgotPasswordButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 110 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
 
-			[self setDefaultButton: loginButton];
+			[[self window] setDefaultButton: loginButton];
 
 			targetWidth = LOGIN_BOX_WIDTH;
 			targetHeight = 145 + messageSize;
@@ -609,7 +615,7 @@ var NARROW_MODE_WIDTH = 300;
 			[registerButton setFrame:CGRectMake(10, 140 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
 			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 140 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
-			[self setDefaultButton: registerButton];
+			[[self window] setDefaultButton: registerButton];
 
 
 			targetWidth = LOGIN_BOX_WIDTH;
@@ -641,7 +647,7 @@ var NARROW_MODE_WIDTH = 300;
 			[submitUsernameButton setFrame:CGRectMake(10, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
 			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
-			[self setDefaultButton: submitUsernameButton];
+			[[self window] setDefaultButton: submitUsernameButton];
 
 
 			targetWidth = LOGIN_BOX_WIDTH;
@@ -673,7 +679,7 @@ var NARROW_MODE_WIDTH = 300;
 			[changePasswordButton setFrame:CGRectMake(10, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [loginButton bounds].size.height)];
 			[cancelButton setFrame:CGRectMake(LOGIN_BOX_WIDTH / 2 + 5, 80 + messageSize,(LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
-			[self setDefaultButton: changePasswordButton];
+			[[self window] setDefaultButton: changePasswordButton];
 
 			targetWidth = LOGIN_BOX_WIDTH;
 			targetHeight = 115 + messageSize;
@@ -701,7 +707,7 @@ var NARROW_MODE_WIDTH = 300;
 			[logoutButton setFrame:CGRectMake(10, 20 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [logoutButton bounds].size.height)];
 			[cancelButton setFrame:CGRectMake(205, 20 + messageSize, (LOGIN_BOX_WIDTH - 30) / 2, [cancelButton bounds].size.height)];
 
-			[self setDefaultButton: logoutButton];
+			[[self window] setDefaultButton: logoutButton];
 
 			targetWidth = LOGIN_BOX_WIDTH;
 			targetHeight = 65 + messageSize;
@@ -726,7 +732,6 @@ var NARROW_MODE_WIDTH = 300;
 			[spinnerView setHidden:NO];
 			[logoutButton setHidden:YES];
 
-			[spinnerView setFrameOrigin:CGPointMake(170, 30 + messageSize)];
 
 			targetWidth = LOGIN_BOX_WIDTH;
 			targetHeight = 115 + messageSize;
@@ -739,14 +744,16 @@ var NARROW_MODE_WIDTH = 300;
 
 	if([errors allObjects].length > 0)
 	{
-		[[self defaultButton] setEnabled:NO];
+		[[[self window] defaultButton] setEnabled:NO];
 	}
 	else
 	{
-		[[self defaultButton] setEnabled:YES];
+		[[[self window] defaultButton] setEnabled:YES];
 	}
 
 	[self setFrame:CGRectMake([self frame].origin.x - xmargins, [self frame].origin.y - ymargins, targetWidth, targetHeight)];
+
+	[spinnerView setCenter:[self center]];
 }
 
 -(CPInteger)state
