@@ -32,7 +32,16 @@ var instance;
 
 -(id)menuItemClicked:(id)sender
 {
-	[[DesktopManager instance] pushTopViewController:controller];
+	if ([[DesktopManager instance] topViewController] !== controller)
+	{
+		[[DesktopManager instance] pushTopViewController:controller];
+	}
+	else
+	{
+		[[DesktopManager instance] removeViewController:controller];
+	}
+
+
 	return sender;
 }
 

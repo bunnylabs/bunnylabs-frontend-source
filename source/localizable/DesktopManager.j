@@ -47,6 +47,15 @@ var desktopInstance;
 	return [topWindow defaultButton];
 }
 
+-(CPViewController)topViewController
+{
+	if (viewControllerStack.length != 0)
+	{
+		return [viewControllerStack last];
+	}
+	return nil;
+}
+
 -(void)pushTopViewController:(CPViewController)aViewController
 {
 	[self _remove:aViewController];

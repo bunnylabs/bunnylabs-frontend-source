@@ -1,11 +1,13 @@
 @import <Foundation/Foundation.j>
 @import <AppKit/AppKit.j>
 
+
 @implementation AdminView : CPView
 {
-	CPArray menuData;
-	CPTableView scrollTableView;
-	CPView anotherView;
+	CPTableView menuTableView @accessors;
+	CPScrollView scrollTableView;
+	CPView anotherView @accessors;
+
 }
 
 -(id)init
@@ -18,13 +20,7 @@
         [splitView setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
 		[self addSubview:splitView];
 
-		menuData = [
-			{name: "Users"},
-			{name: "Sessions"}
-		];
-
-		var menuTableView = [[CPTableView alloc] initWithFrame:CGRectMake(0,0,150,500)];
-		[menuTableView setDataSource:self];
+		menuTableView = [[CPTableView alloc] initWithFrame:CGRectMake(0,0,150,500)];
 		[menuTableView setHeaderView:nil];
 		[menuTableView addTableColumn:[[CPTableColumn alloc] initWithIdentifier:"menuitems"]];
 
@@ -34,24 +30,15 @@
 		[splitView addSubview:scrollTableView];
 
 		anotherView = [[CPView alloc] initWithFrame:CGRectMake(0,0,350,500)];
-		[anotherView setBackgroundColor:[CPColor redColor]];
+		[anotherView setBackgroundColor:[CPColor grayColor]];
 
 		[splitView addSubview:anotherView];
 
         [self setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
 
+
 	}
 	return self;
-}
-
--(int)numberOfRowsInTableView:(CPTableView)aTableView
-{
-	return menuData.length;
-}
-
--(id)tableView:(CPTableView)aTableView objectValueForTableColumn:(CPTableColumn)aColumn row:(int)aRowIndex
-{
-	return menuData[aRowIndex].name;
 }
 
 -(float)splitView:(CPSplitView)aSpiltView constrainSplitPosition:(float)proposedPosition ofSubviewAt:(int)subviewIndex
@@ -76,11 +63,6 @@
     	0,
     	splitViewSize.width - [aSplitView dividerThickness] - 150,
     	splitViewSize.height)];
-}
-
--(void)splitViewDidResizeSubviews:(CPNotification)aNotification
-{
-	CPLog("resize");
 }
 
 @end
