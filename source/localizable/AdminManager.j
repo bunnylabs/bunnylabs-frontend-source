@@ -41,7 +41,6 @@ var instance;
 		[[DesktopManager instance] removeViewController:controller];
 	}
 
-
 	return sender;
 }
 

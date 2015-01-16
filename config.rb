@@ -41,11 +41,14 @@
 # end
 
 # Methods defined in the helpers block are available in templates
-# helpers do
-#   def some_helper
-#     "Helping"
-#   end
-# end
+helpers do  
+  
+  # Returns all applications' names
+  def application_list
+    Dir['source/localizable/Applications/*'].map { |a| File.basename(a) }
+  end
+
+end
 
 activate :i18n, :mount_at_root => false
 

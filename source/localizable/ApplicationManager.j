@@ -24,9 +24,24 @@ var instance;
 													 name:NOTIFICATION_LOGIN_DATA_UPDATED 
 												   object:nil];
 
-		applicationItem = [[CPMenuItem alloc] initWithTitle:"Applications" action:nil keyEquivalent:nil];
+		applicationItem = [[CPMenuItem alloc] initWithTitle:"Applications" action:@selector(menuItemClicked:) keyEquivalent:nil];
+		[applicationItem setTarget:self];
 	}
 	return self;
+}
+
+-(id)menuItemClicked:(id)sender
+{
+	if ([[DesktopManager instance] topViewController] !== controller)
+	{
+		[[DesktopManager instance] pushTopViewController:controller];
+	}
+	else
+	{
+		[[DesktopManager instance] removeViewController:controller];
+	}
+
+	return sender;
 }
 
 -(void)loginStateChanged
