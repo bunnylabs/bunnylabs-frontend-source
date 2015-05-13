@@ -15,11 +15,12 @@ popd
 # pull the old repository
 git clone git@github.com:bunnylabs/bunnylabs.github.io
 
-# add and push new content
-pushd bunnylabs.github.io
 git config --global user.email "davidsiaw@gmail.com"
 git config --global user.name "David Siaw (via Travis CI)"
 git config --global push.default simple
+
+# add and push new content
+pushd bunnylabs.github.io
 rm -r *
 cp ../build/* .
 mkdir -p en
@@ -31,6 +32,10 @@ git add -u
 git commit -m "Update site"
 git push
 popd
+
+git config --global user.email "davidsiaw@gmail.com"
+git config --global user.name "David Siaw"
+git config --global push.default simple
 
 # cleanup
 rm -rf bunnylabs.github.io

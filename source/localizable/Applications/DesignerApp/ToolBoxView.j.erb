@@ -47,7 +47,7 @@
 	{
 		return elements[aRowIndex];
 	}
-	return [[CPImage alloc] initWithContentsOfFile:@"<%= I18n.locale %>/Applications/DesignerApp/Images/" + elements[aRowIndex] + ".png"];
+	return [[CPImage alloc] initWithContentsOfFile:@"/<%= I18n.locale %>/Applications/DesignerApp/Images/" + elements[aRowIndex] + ".png"];
 }
 
 @end

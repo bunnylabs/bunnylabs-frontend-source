@@ -35,7 +35,7 @@
 		<% application_list().each do |appname| %>
 		{
 			var app = [[<%= appname %> alloc] init];
-			var icon = [[CPImage alloc] initWithContentsOfFile:"<%= I18n.locale %>/Applications/<%= appname %>/icon.png"
+			var icon = [[CPImage alloc] initWithContentsOfFile:"/<%= I18n.locale %>/Applications/<%= appname %>/icon.png"
 														size:CGSizeMake(200.0, 200.0)];
 
 			var item = [ApplicationInfo applicationInfoOf:app withIcon:icon];
