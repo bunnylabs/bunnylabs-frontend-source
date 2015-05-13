@@ -29,5 +29,8 @@
 
 - (void)collectionView:(CPCollectionView)collectionView didDoubleClickOnItemAtIndex:(int)index
 {
+	var app = [[[collectionView items][index] representedObject] application];
+	
+	[[DesktopManager instance] pushTopViewController:[app viewController]];
 }
 @end

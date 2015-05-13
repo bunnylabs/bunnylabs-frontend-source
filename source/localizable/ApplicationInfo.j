@@ -3,14 +3,19 @@
 
 @implementation ApplicationInfo : CPObject
 {
-	CPString name @accessors;
 	CPImage icon @accessors;
+	id application @accessors;
 }
 
-+(ApplicationInfo)applicationInfoNamed:(CPString)aName withIcon:(CPImage)anImage
+-(CPString)name
+{
+	return [application name];
+}
+
++(ApplicationInfo)applicationInfoOf:(CPString)anApp withIcon:(CPImage)anImage
 {
 	var result = [[ApplicationInfo alloc] init];
-	[result setName:aName];
+	[result setApplication:anApp];
 	[result setIcon:anImage];
 	return result;
 }

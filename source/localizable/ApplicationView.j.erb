@@ -38,7 +38,7 @@
 			var icon = [[CPImage alloc] initWithContentsOfFile:"<%= I18n.locale %>/Applications/<%= appname %>/icon.png"
 														size:CGSizeMake(200.0, 200.0)];
 
-			var item = [ApplicationInfo applicationInfoNamed:[app name] withIcon:icon];
+			var item = [ApplicationInfo applicationInfoOf:app withIcon:icon];
 
 			items.push(item);
 		}

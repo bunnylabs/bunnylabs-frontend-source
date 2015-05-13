@@ -6,12 +6,19 @@
 
 var desktopInstance;
 
+@implementation BreadcrumbButton : CPButton
+{
+	id representedObject @accessors;
+}
+@end
+
 @implementation DesktopManager : CPObject
 {
 	CPView topWindow;
 	CPView contentView;
 
 	CPArray viewControllerStack;
+
 }
 
 -(id)init
@@ -34,7 +41,56 @@ var desktopInstance;
 	{
 		[[viewControllerStack last] desktopDidResizeToRect:[contentView frame]];
 	}
+
+	[[[MenuManager instance] centerStack] removeAllObjects];
+
+	var i=0;
+	for (i=0; i<viewControllerStack.length; i++)
+	{
+		var name = viewControllerStack[i].isa.name;
+
+		// Exclude the background
+		if (name === "BunnyLabsIconViewController")
+		{
+			continue;
+		}
+
+		if ([viewControllerStack[i] respondsToSelector:@selector(breadcrumbName)])
+		{
+			name = [viewControllerStack[i] breadcrumbName];
+		}
+
+		var title = "[" + name + "]";
+
+		var layer = [[CPMenuItem alloc] initWithTitle:"" action:nil keyEquivalent:""];
+
+		var button = [BreadcrumbButton buttonWithTitle:title];
+		[button setAction:@selector(breadcrumbMoveToTop:)];
+		[button setTarget:self];
+		[button setRepresentedObject: viewControllerStack[i]];
+
+		var menu = [[CPMenu alloc] init];
+		var menuCloseItem = [[CPMenuItem alloc] initWithTitle:"Close" action:@selector(breadcrumbClose:) keyEquivalent:""];
+		[menuCloseItem setTarget:self];
+		[menuCloseItem setRepresentedObject:viewControllerStack[i]];
+		[menu addItem:menuCloseItem];
+		[button setMenu:menu];
+
+		[layer setView:button];
+		[[[MenuManager instance] centerStack] addObject:layer];
+	}
+
 	[[MenuManager instance] refreshMenu];
+}
+
+-(void)breadcrumbMoveToTop:(id)sender
+{
+	[self pushTopViewController:[sender representedObject]];
+}
+
+-(void)breadcrumbClose:(id)sender
+{
+	[self removeViewController:[sender representedObject]];
 }
 
 -(void)setDefaultButton:(CPButton)aButton

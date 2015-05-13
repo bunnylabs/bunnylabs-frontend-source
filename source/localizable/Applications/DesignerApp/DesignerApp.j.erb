@@ -1,0 +1,26 @@
+@import <Foundation/Foundation.j>
+@import <AppKit/AppKit.j>
+
+@import "DesignerAppViewController.j"
+
+
+@implementation DesignerApp : CPObject
+{
+	DesignerAppViewController controller;
+}
+
+-(CPString)name
+{
+	return "Form Designer";
+}
+
+-(CPViewController)viewController
+{
+	if (!controller)
+	{
+		controller = [[DesignerAppViewController alloc] init];
+	}
+	return controller;
+}
+
+@end
