@@ -9,7 +9,9 @@
 
 -(CPString)name
 {
-	return [application name];
+	var bundle = [CPBundle bundleWithIdentifier:[application bundleIdentifier]];
+	var name = [[bundle infoDictionary] objectForKey:"CPBundleName"];
+	return name;
 }
 
 +(ApplicationInfo)applicationInfoOf:(CPString)anApp withIcon:(CPImage)anImage

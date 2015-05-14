@@ -1,6 +1,8 @@
 @import <Foundation/Foundation.j>
 @import <AppKit/AppKit.j>
 
+var BUNDLE_IDENTIFIER = "net.astrobunny.bunnylabs.DesignerApp";
+
 @import "DesignerAppViewController.j"
 
 
@@ -9,9 +11,9 @@
 	DesignerAppViewController controller;
 }
 
--(CPString)name
+-(CPString)bundleIdentifier
 {
-	return "Form Designer";
+    return BUNDLE_IDENTIFIER;
 }
 
 -(CPViewController)viewController

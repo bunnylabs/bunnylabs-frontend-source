@@ -21,7 +21,11 @@ var MINSIDEBARWIDTH = 200;
         [self setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
         [self setDelegate:self];
 
-        var mainBackground = [[CPImage alloc] initWithContentsOfFile:@"/<%= I18n.locale %>/Applications/DesignerApp/910.jpg"];
+
+        var bundle = [CPBundle bundleWithIdentifier:"net.astrobunny.bunnylabs.DesignerApp"];
+		var file = [bundle pathForResource:"Images/910.jpg"];
+
+        var mainBackground = [[CPImage alloc] initWithContentsOfFile:file];
 
         elementList = [[CPTabView alloc] init];
         [elementList setBackgroundColor:[CPColor darkGrayColor]];
