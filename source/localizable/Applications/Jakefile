@@ -32,8 +32,8 @@ app (projectName, function(task)
     task.setAuthor("Your Company");
     task.setEmail("feedback @nospam@ yourcompany.com");
     task.setSummary("BunnyLabs");
-    task.setSources(new FileList("**/*.j", "Applications/**/Info.plist").exclude(FILE.join("Build", "**")).exclude(FILE.join("Frameworks", "Source", "**")));
-    task.setResources(new FileList("Resources/**/**", "Applications/*/Resources/**/**", "Applications/*/Resources/**/Info.plist"));
+    task.setSources(new FileList("**/*.j").exclude(FILE.join("Build", "**")).exclude(FILE.join("Frameworks", "Source", "**")));
+    task.setResources(new FileList("Resources/**/*"));
     task.setIndexFilePath("index.html");
     task.setInfoPlistPath("Info.plist");
 

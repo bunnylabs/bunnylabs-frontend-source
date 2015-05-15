@@ -6,7 +6,7 @@
 
 // Import the applications
 <% application_list().each do |appname| %>
-@import "Frameworks/Applications/<%= appname %>/<%= appname %>.j"
+@import "Applications/<%= appname %>/<%= appname %>.j"
 <% end %>
 
 @implementation ApplicationView : CPView

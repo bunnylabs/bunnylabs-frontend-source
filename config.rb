@@ -45,7 +45,7 @@ helpers do
   
   # Returns all applications' names
   def application_list
-    Dir['source/localizable/Frameworks/Applications/*'].map { |a| File.basename(a) }
+    Dir['source/localizable/Applications/*'].select { |a| File.directory? a }.map { |a| File.basename(a) }
   end
 
 end
