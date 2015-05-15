@@ -10,6 +10,7 @@ var ENV = require("system").env,
     FILE = require("file"),
     JAKE = require("jake"),
     task = JAKE.task,
+    rule = JAKE.rule,
     FileList = JAKE.FileList,
     app = require("cappuccino/jake").app,
     configuration = ENV["CONFIG"] || ENV["CONFIGURATION"] || ENV["c"] || "Debug",
@@ -32,8 +33,8 @@ app (projectName, function(task)
     task.setAuthor("Your Company");
     task.setEmail("feedback @nospam@ yourcompany.com");
     task.setSummary("BunnyLabs");
-    task.setSources(new FileList("**/*.j", "Applications/**/Info.plist").exclude(FILE.join("Build", "**")).exclude(FILE.join("Frameworks", "Source", "**")));
-    task.setResources(new FileList("Resources/**/**", "Applications/*/Resources/**/**", "Applications/*/Resources/**/Info.plist"));
+    task.setSources(new FileList("**/*.j").exclude(FILE.join("Build", "**")).exclude(FILE.join("Frameworks", "Source", "**")));
+    task.setResources(new FileList("Resources/**/**"));
     task.setIndexFilePath("index.html");
     task.setInfoPlistPath("Info.plist");
 
@@ -57,12 +58,14 @@ task ("debug", function()
 {
     ENV["CONFIGURATION"] = "Debug";
     JAKE.subjake(["."], "build", ENV);
+    copyApplicationFiles();
 });
 
 task ("release", function()
 {
     ENV["CONFIGURATION"] = "Release";
     JAKE.subjake(["."], "build", ENV);
+    copyApplicationFiles();
 });
 
 task ("run", ["debug"], function()
@@ -79,6 +82,7 @@ task ("deploy", ["release"], function()
 {
     FILE.mkdirs(FILE.join("Build", "Deployment", projectName));
     OS.system(["press", "-f", FILE.join("Build", "Release", projectName), FILE.join("Build", "Deployment", projectName)]);
+
     printResults("Deployment")
 });
 
@@ -93,6 +97,43 @@ task ("run-desktop", ["desktop"], function()
 {
     OS.system([FILE.join("Build", "Desktop", projectName, "BunnyLabs.app", "Contents", "MacOS", "NativeHost"), "-i"]);
 });
+
+function copyApplicationFiles()
+{
+    var list = new FileList("Applications/**/*");
+    list.exclude("**/*.j");
+    list.exclude("**/ImageSources/**");
+    list = list.toArray();
+
+    if (!FILE.exists(FILE.join("Build", ENV["CONFIGURATION"], projectName, "Applications")))
+    {
+        FILE.mkdir(FILE.join("Build", ENV["CONFIGURATION"], projectName, "Applications"));
+    }
+    
+    for (var i=0; i<list.length; i++)
+    {
+        try 
+        {
+            if (FILE.isDirectory(list[i]))
+            {
+                if (!FILE.exists(FILE.join("Build", ENV["CONFIGURATION"], projectName, list[i])))
+                {
+                    print("Directory " + list[i]);
+                    FILE.mkdir(FILE.join("Build", ENV["CONFIGURATION"], projectName, list[i]));
+                }
+            }
+            else
+            {
+                FILE.copy(list[i], FILE.join("Build", ENV["CONFIGURATION"], projectName, list[i]));
+                print("Copying " + list[i] + " to " + FILE.join("Build", ENV["CONFIGURATION"], projectName, list[i]));
+            }
+        }
+        catch (e)
+        {
+            print(e);
+        }
+    }
+}
 
 function printResults(configuration)
 {

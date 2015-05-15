@@ -30,13 +30,8 @@
 
         <!-- Custom javascript goes here -->
 
-<% if config[:environment] == :development %>
         <script type="text/javascript" src="/<%= I18n.locale %>/Resources/persist-all-min.js"></script>
         <script type="text/javascript" src="/<%= I18n.locale %>/Resources/scream.min.js"></script>
-<% else %>
-        <script type="text/javascript" src="/<%= I18n.locale %>/Resources/Resources/persist-all-min.js"></script>
-        <script type="text/javascript" src="/<%= I18n.locale %>/Resources/Resources/scream.min.js"></script>
-<% end %>
 
         <script type="text/javascript">
             var scream = gajus.Scream({
