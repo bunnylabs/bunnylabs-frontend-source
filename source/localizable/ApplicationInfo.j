@@ -14,11 +14,14 @@
 	return name;
 }
 
-+(ApplicationInfo)applicationInfoOf:(CPString)anApp withIcon:(CPImage)anImage withBundle:(CPBundle)aBundle
++(ApplicationInfo)applicationInfoOf:(CPString)anApp withBundle:(CPBundle)aBundle
 {
 	var result = [[ApplicationInfo alloc] init];
+    var file = [aBundle pathForResource:@"Images/icon.png"];
+	var icon = [[CPImage alloc] initWithContentsOfFile:file size:CGSizeMake(200.0, 200.0)];
+
 	[result setApplication:anApp];
-	[result setIcon:anImage];
+	[result setIcon:icon];
 	[result setBundle:aBundle];
 	return result;
 }

@@ -9,11 +9,13 @@
 	CPBundle bundle;
 }
 
--(id)initWithBundle:(CPBundle)bundle
+-(id)initWithBundle:(CPBundle)aBundle
 {
 	self = [super initWithFrame:CGRectMake(0,0,0,20)];
 	if (self)
 	{
+		bundle = aBundle;
+		
 		tableView = [[CPTableView alloc] initWithFrame:CGRectMake(0,20,0,0)];
 
 		var iconColumn = [[CPTableColumn alloc] initWithIdentifier:"icons"];
