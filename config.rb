@@ -71,7 +71,6 @@ set :capp_type_checking, false
 set :capp_logger, :default
 set :capp_tag_elements, true
 
-
 configure :development do
   set :api_server_url, "http://localhost:9292"
   set :github_client_id, "846f90c1b0e633dad4e8"

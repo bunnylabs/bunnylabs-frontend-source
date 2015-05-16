@@ -34,4 +34,6 @@ jp:
   logged_in_as: "%@さん"
   logout: "ログアウト"
   unable_to_github_login: "Githubでログインすることできません。原因: %@"
+  validation_pass: "アカウント確認は成功しました。現在ログインすることができます。"
+  validation_fail: "異常な状況が出てきました。もしかしてアカウントはすでに確認しました。"
   internal_server_error: "エラーが発生しました"
