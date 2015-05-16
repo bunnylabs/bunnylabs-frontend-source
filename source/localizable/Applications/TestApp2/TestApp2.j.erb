@@ -1,16 +1,17 @@
 @import <Foundation/Foundation.j>
 @import <AppKit/AppKit.j>
 
-var BUNDLE_IDENTIFIER = "net.astrobunny.bunnylabs.TestApp2";
-
 @implementation TestApp2ViewController : CPViewController
+{
+    CPBundle bundle;
+}
 
--(id)init
+-(id)initWithBundle:(CPBundle)aBundle
 {
     self = [super init];
     if (self)
     {
-        var bundle = [CPBundle bundleWithIdentifier:BUNDLE_IDENTIFIER];
+        bundle = aBundle;
 
         var file = [bundle pathForResource:@"Images/icon.png"];
 
@@ -39,18 +40,24 @@ var BUNDLE_IDENTIFIER = "net.astrobunny.bunnylabs.TestApp2";
 @implementation TestApp2 : CPObject
 {
 	TestApp2ViewController controller;
+    CPBundle bundle;
 }
 
--(CPString)bundleIdentifier
+-(id)initWithBundle:(CPBundle)aBundle
 {
-    return BUNDLE_IDENTIFIER;
+    self = [super init];
+    if (self)
+    {
+        bundle = aBundle;
+    }
+    return self;
 }
 
 -(CPViewController)viewController
 {
 	if (!controller)
 	{
-		controller = [[TestApp2ViewController alloc] init];
+		controller = [[TestApp2ViewController alloc] initWithBundle:bundle];
 	}
 	return controller;
 }

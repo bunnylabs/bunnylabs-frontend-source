@@ -8,12 +8,12 @@
 	DesignerAppView view;
 }
 
--(id)init
+-(id)initWithBundle:(CPBundle)aBundle
 {
     self = [super init];
     if (self)
     {
-    	view = [[DesignerAppView alloc] init];
+    	view = [[DesignerAppView alloc] initWithBundle:aBundle];
         [self setView:view];
     }
     return self;

@@ -34,16 +34,16 @@
         // Add applications to the list
 		<% application_list().each do |appname| %>
 		{
-			var app = [[<%= appname %> alloc] init];
-
 			var appBundle = [CPBundle bundleWithPath:"Applications/<%= appname %>"];
+
+			var app = [[<%= appname %> alloc] initWithBundle:appBundle];
 
 	        var file = [appBundle pathForResource:@"Images/icon.png"];
 
 			var icon = [[CPImage alloc] initWithContentsOfFile:file
 														size:CGSizeMake(200.0, 200.0)];
 
-			var item = [ApplicationInfo applicationInfoOf:app withIcon:icon];
+			var item = [ApplicationInfo applicationInfoOf:app withIcon:icon withBundle:appBundle];
 
 			items.push(item);
 		}

@@ -1,26 +1,29 @@
 @import <Foundation/Foundation.j>
 @import <AppKit/AppKit.j>
 
-var BUNDLE_IDENTIFIER = "net.astrobunny.bunnylabs.DesignerApp";
-
 @import "DesignerAppViewController.j"
-
 
 @implementation DesignerApp : CPObject
 {
 	DesignerAppViewController controller;
+    CPBundle bundle;
 }
 
--(CPString)bundleIdentifier
+-(id)initWithBundle:(CPBundle)aBundle
 {
-    return BUNDLE_IDENTIFIER;
+    self = [super init];
+    if (self)
+    {
+        bundle = aBundle;
+    }
+    return self;
 }
 
 -(CPViewController)viewController
 {
 	if (!controller)
 	{
-		controller = [[DesignerAppViewController alloc] init];
+		controller = [[DesignerAppViewController alloc] initWithBundle:bundle];
 	}
 	return controller;
 }

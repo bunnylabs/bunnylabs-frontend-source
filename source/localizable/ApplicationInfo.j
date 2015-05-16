@@ -5,20 +5,21 @@
 {
 	CPImage icon @accessors;
 	id application @accessors;
+	CPBundle bundle @accessors;
 }
 
 -(CPString)name
 {
-	var bundle = [CPBundle bundleWithIdentifier:[application bundleIdentifier]];
 	var name = [[bundle infoDictionary] objectForKey:"CPBundleName"];
 	return name;
 }
 
-+(ApplicationInfo)applicationInfoOf:(CPString)anApp withIcon:(CPImage)anImage
++(ApplicationInfo)applicationInfoOf:(CPString)anApp withIcon:(CPImage)anImage withBundle:(CPBundle)aBundle
 {
 	var result = [[ApplicationInfo alloc] init];
 	[result setApplication:anApp];
 	[result setIcon:anImage];
+	[result setBundle:aBundle];
 	return result;
 }
 

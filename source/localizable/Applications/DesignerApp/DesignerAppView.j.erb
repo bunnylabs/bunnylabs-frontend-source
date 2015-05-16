@@ -14,7 +14,7 @@ var TOPBARHEIGHT = 30;
 	CPView mainView;
 }
 
--(id)init
+-(id)initWithBundle:(CPBundle)aBundle
 {
 	self = [super initWithFrame:CPRectMake(0,0,500,500)];
 	if (self)
@@ -28,7 +28,7 @@ var TOPBARHEIGHT = 30;
 
         [self addSubview:topBar];
 
-        splitView = [[ContentView alloc] init];
+        splitView = [[ContentView alloc] initWithBundle:aBundle];
         elementList = [splitView elementList];
         mainView = [splitView mainView];
 

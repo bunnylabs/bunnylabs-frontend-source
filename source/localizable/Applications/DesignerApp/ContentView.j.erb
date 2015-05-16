@@ -12,7 +12,7 @@ var MINSIDEBARWIDTH = 200;
 	CPView mainView;
 }
 
--(id)init
+-(id)initWithBundle:(CPBundle)bundle
 {
 	self = [super init];
 	if (self)
@@ -21,8 +21,6 @@ var MINSIDEBARWIDTH = 200;
         [self setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
         [self setDelegate:self];
 
-
-        var bundle = [CPBundle bundleWithIdentifier:"net.astrobunny.bunnylabs.DesignerApp"];
 		var file = [bundle pathForResource:"Images/910.jpg"];
 
         var mainBackground = [[CPImage alloc] initWithContentsOfFile:file];
