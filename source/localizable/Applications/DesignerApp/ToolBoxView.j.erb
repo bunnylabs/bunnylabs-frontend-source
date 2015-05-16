@@ -9,13 +9,11 @@
 	CPBundle bundle;
 }
 
--(id)init
+-(id)initWithBundle:(CPBundle)bundle
 {
 	self = [super initWithFrame:CGRectMake(0,0,0,20)];
 	if (self)
 	{
-		bundle = [CPBundle bundleWithIdentifier:"net.astrobunny.bunnylabs.DesignerApp"];
-
 		tableView = [[CPTableView alloc] initWithFrame:CGRectMake(0,20,0,0)];
 
 		var iconColumn = [[CPTableColumn alloc] initWithIdentifier:"icons"];

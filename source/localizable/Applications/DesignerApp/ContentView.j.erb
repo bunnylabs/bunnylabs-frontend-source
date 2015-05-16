@@ -30,7 +30,7 @@ var MINSIDEBARWIDTH = 200;
 
         var item = [[CPTabViewItem alloc] init];
         [item setLabel:"Toolbox"];
-        [item setView:[[ToolBoxView alloc] init]];
+        [item setView:[[ToolBoxView alloc] initWithBundle:bundle]];
         [elementList addTabViewItem:item]; 
 
         var item = [[CPTabViewItem alloc] init];
