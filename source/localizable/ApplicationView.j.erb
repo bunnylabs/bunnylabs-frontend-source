@@ -13,6 +13,7 @@
 {
 	CPCollectionView iconsView @accessors;
 	CPScrollView scrollView;
+	CPArray items;
 }
 
 -(id)init
@@ -20,6 +21,7 @@
 	self = [super initWithFrame:CGRectMake(0,0,500,500)];
 	if (self)
 	{
+		items = [];
         scrollView = [[CPScrollView alloc] initWithFrame:[self frame]];
         [scrollView setAutoresizingMask:CPViewWidthSizable | CPViewHeightSizable];
         [scrollView setAutohidesScrollers:YES];
@@ -29,18 +31,19 @@
 
         [self setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
 
-        var items = [];
-
         // Add applications to the list
 		<% application_list().each do |appname| %>
 		{
-			var app = [[<%= appname %> alloc] init];
-			var icon = [[CPImage alloc] initWithContentsOfFile:"<%= I18n.locale %>/Applications/<%= appname %>/icon.png"
-														size:CGSizeMake(200.0, 200.0)];
-
-			var item = [ApplicationInfo applicationInfoNamed:[app name] withIcon:icon];
-
-			items.push(item);
+			var appBundle = [CPBundle bundleWithPath:"Applications/<%= appname %>"];
+			appBundle["_appclass"] = [<%= appname %> class];
+			if ([appBundle isLoaded])
+			{
+				[self bundleDidFinishLoading:appBundle];
+			}
+			else
+			{
+				[appBundle loadWithDelegate:self];
+			}
 		}
 		<% end %>
 		
@@ -52,5 +55,15 @@
 	}
 	return self;
 }
+
+-(void)bundleDidFinishLoading:(CPBundle)appBundle
+{
+	var app = [[appBundle["_appclass"] alloc] initWithBundle:appBundle];
+	var item = [ApplicationInfo applicationInfoOf:app withBundle:appBundle];
+	items.push(item);
+	[iconsView setContent:items];
+	[iconsView reloadContent];
+}
+
 
 @end

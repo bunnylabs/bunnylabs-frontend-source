@@ -1,0 +1,31 @@
+@import <Foundation/Foundation.j>
+@import <AppKit/AppKit.j>
+
+@import "DesignerAppViewController.j"
+
+@implementation DesignerApp : CPObject
+{
+	DesignerAppViewController controller;
+    CPBundle bundle;
+}
+
+-(id)initWithBundle:(CPBundle)aBundle
+{
+    self = [super init];
+    if (self)
+    {
+        bundle = aBundle;
+    }
+    return self;
+}
+
+-(CPViewController)viewController
+{
+	if (!controller)
+	{
+		controller = [[DesignerAppViewController alloc] initWithBundle:bundle];
+	}
+	return controller;
+}
+
+@end

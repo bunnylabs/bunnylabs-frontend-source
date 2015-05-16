@@ -26,4 +26,9 @@
     return self;
 }
 
+-(CPString)breadcrumbName
+{
+    return "Desktop"
+}
+
 @end

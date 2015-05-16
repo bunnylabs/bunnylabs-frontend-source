@@ -1,0 +1,67 @@
+@import <Foundation/Foundation.j>
+@import <AppKit/AppKit.j>
+
+@implementation TestApp1ViewController : CPViewController
+{
+    CPBundle bundle;
+}
+
+-(id)initWithBundle:(CPBundle)aBundle
+{
+    self = [super init];
+    if (self)
+    {
+        bundle = aBundle;
+
+        var file = [bundle pathForResource:@"Images/icon.png"];
+
+        var image = [[CPImage alloc] initWithContentsOfFile:file];
+
+        var imageView = [[CPImageView alloc] initWithFrame:CGRectMake(0, 0, 1280, 720)];
+
+        [imageView setImage:image];
+        [imageView setAutoresizingMask: CPViewMinXMargin |
+                                        CPViewMaxXMargin |
+                                        CPViewMinYMargin |
+                                        CPViewMaxYMargin];
+
+        [self setView:imageView];
+    }
+    return self;
+}
+
+
+-(CPString)breadcrumbName
+{
+	return "Test 1"
+}
+
+@end
+
+
+@implementation TestApp1 : CPObject
+{
+	TestApp1ViewController controller;
+    CPBundle bundle;
+}
+
+-(id)initWithBundle:(CPBundle)aBundle
+{
+    self = [super init];
+    if (self)
+    {
+        bundle = aBundle;
+    }
+    return self;
+}
+
+-(CPViewController)viewController
+{
+	if (!controller)
+	{
+		controller = [[TestApp1ViewController alloc] initWithBundle:bundle];
+	}
+	return controller;
+}
+
+@end

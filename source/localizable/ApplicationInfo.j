@@ -3,15 +3,26 @@
 
 @implementation ApplicationInfo : CPObject
 {
-	CPString name @accessors;
 	CPImage icon @accessors;
+	id application @accessors;
+	CPBundle bundle @accessors;
 }
 
-+(ApplicationInfo)applicationInfoNamed:(CPString)aName withIcon:(CPImage)anImage
+-(CPString)name
+{
+	var name = [[bundle infoDictionary] objectForKey:"CPBundleName"];
+	return name;
+}
+
++(ApplicationInfo)applicationInfoOf:(CPString)anApp withBundle:(CPBundle)aBundle
 {
 	var result = [[ApplicationInfo alloc] init];
-	[result setName:aName];
-	[result setIcon:anImage];
+    var file = [aBundle pathForResource:@"Images/icon.png"];
+	var icon = [[CPImage alloc] initWithContentsOfFile:file size:CGSizeMake(200.0, 200.0)];
+
+	[result setApplication:anApp];
+	[result setIcon:icon];
+	[result setBundle:aBundle];
 	return result;
 }
 

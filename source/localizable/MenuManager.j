@@ -65,7 +65,6 @@ var menuManagerInstance;
     }
 
     [leftStack foreach:addItem];
-    [mainMenu addItem:[CPMenuItem separatorItem]];
     [centerStack foreach:addItem];
     [mainMenu addItem:[CPMenuItem separatorItem]];
     [rightStack foreach:addItem];
