@@ -3,6 +3,8 @@
 
 @import "UITreeView.j"
 @import "ToolBoxView.j"
+@import "WorkspaceView.j"
+@import "WorkspaceModel.j"
 
 var MINSIDEBARWIDTH = 200;
 
@@ -10,6 +12,8 @@ var MINSIDEBARWIDTH = 200;
 {
 	CPView elementList;
 	CPView mainView;
+
+    WorkspaceModel model;
 }
 
 -(id)initWithBundle:(CPBundle)bundle
@@ -21,17 +25,15 @@ var MINSIDEBARWIDTH = 200;
         [self setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
         [self setDelegate:self];
 
-		var file = [bundle pathForResource:"Images/910.jpg"];
-
-        var mainBackground = [[CPImage alloc] initWithContentsOfFile:file];
-
         elementList = [[CPTabView alloc] init];
         [elementList setBackgroundColor:[CPColor darkGrayColor]];
 
         var item = [[CPTabViewItem alloc] init];
+        var toolboxView = [[ToolBoxView alloc] initWithBundle:bundle];
+        [toolboxView setDelegate:self];
         [item setLabel:"Toolbox"];
-        [item setView:[[ToolBoxView alloc] initWithBundle:bundle]];
-        [elementList addTabViewItem:item]; 
+        [item setView:toolboxView];
+        [elementList addTabViewItem:item];
 
         var item = [[CPTabViewItem alloc] init];
         [item setLabel:"UI Tree"];
@@ -40,14 +42,22 @@ var MINSIDEBARWIDTH = 200;
 
         [self addSubview:elementList];
 
-        mainView = [[CPView alloc] init];
-        [mainView setBackgroundColor:[CPColor colorWithPatternImage:mainBackground]];
+        model = [[WorkspaceModel alloc] init];
+
+        mainView = [[WorkspaceView alloc] initWithBundle:bundle];
+        [mainView setDataSource:model];
 
         [self addSubview:mainView];
 
         [self setPosition:MINSIDEBARWIDTH ofDividerAtIndex:0];
 	}
 	return self;
+}
+
+-(void)requestAddElement:(CPString)aType
+{
+    [model addElementOfType:aType];
+    [mainView reloadData];
 }
 
 -(CPColor)mainView

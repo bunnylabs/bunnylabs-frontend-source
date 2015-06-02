@@ -3,6 +3,49 @@
 
 // Contains a complete description of the current workspace
 @implementation WorkspaceModel : CPObject
+{
+	int idcounter;
+	CPArray elements;
+	id elementMap;
+}
 
+-(id)init
+{
+	self = [super init];
+	if (self)
+	{
+		idcounter = 0;
+		elements = [];
+		elementMap = {};
+	}
+
+	return self;
+}
+
+-(void)addElementOfType:(CPString)type
+{
+	var element = {
+		id: idcounter++,
+		type: type,
+		x: 50,
+		y: 50,
+		w: 200,
+		h: 200,
+		children: []
+	};
+
+	elements.push(element);
+	elementMap[element.id] = element;
+}
+
+-(void)updateElement:(id)anElement
+{
+	
+}
+
+-(CPArray)elements
+{
+	return elements;
+}
 
 @end

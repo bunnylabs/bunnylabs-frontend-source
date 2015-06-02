@@ -7,6 +7,8 @@
 	CPArray elements;
 
 	CPBundle bundle;
+
+	id delegate @accessors;
 }
 
 -(id)initWithBundle:(CPBundle)aBundle
@@ -32,6 +34,8 @@
         [tableView setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
 		elements = ["CPView", "CPTableView", "CPSplitView", "CPButton"];
 
+		[tableView setTarget:self];
+		[tableView setDoubleAction:@selector(doubleClick:)];
 		[tableView setDataSource:self];
 		[tableView reloadData];
 
@@ -55,6 +59,14 @@
 	var file = [bundle pathForResource:"Images/" + elements[aRowIndex] + ".png"];
 
 	return [[CPImage alloc] initWithContentsOfFile:file];
+}
+
+-(void)doubleClick:(id)sender
+{
+	if ([delegate respondsToSelector:@selector(requestAddElement:)])
+	{
+		[delegate requestAddElement:elements[[tableView selectedRow]]];
+	}
 }
 
 @end
