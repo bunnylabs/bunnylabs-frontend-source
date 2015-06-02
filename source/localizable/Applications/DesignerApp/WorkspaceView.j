@@ -52,7 +52,7 @@
 
 -(void)addElement:(id)element
 {
-	var coverElement = [[DraggableView alloc] initWithElement:element];
+	var coverElement = [[ResizableView alloc] initWithElement:element];
 	[coverElement setDelegate:self];
 	[self addSubview:coverElement];
 
@@ -62,10 +62,39 @@
 		{
 			var view = [[CPView alloc] initWithFrame:CGRectMake(0, 0, element.w, element.h)];
 			[view setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
-			[view setBackgroundColor:[CPColor whiteColor]];
+			[view setBackgroundColor:[CPColor redColor]];
 			[coverElement setView:view];
 			break;
 		}
+
+		case "CPTableView":
+		{
+			var view = [[CPTableView alloc] initWithFrame:CGRectMake(0, 0, element.w, element.h)];
+			[view setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
+			[coverElement setView:view];
+			break;
+		}
+
+
+		case "CPButton":
+		{
+			var view = [[CPButton alloc] initWithFrame:CGRectMake(0, 0, element.w, element.h)];
+			[view setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
+			[coverElement setView:view];
+			break;
+		}
+
+		case "CPTextField":
+		{
+			var view = [[CPTextField alloc] initWithFrame:CGRectMake(0, 0, element.w, element.h)];
+			[view setBordered:YES]; 
+			[view setBezeled:YES]; 
+			[view setBezelStyle:CPTextFieldSquareBezel];
+			[view setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
+			[coverElement setView:view];
+			break;
+		}
+
 
 		default:
 		{
