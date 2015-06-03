@@ -2,7 +2,7 @@
 @import <AppKit/AppKit.j>
 
 @import "WorkspaceModel.j"
-@import "DraggableView.j"
+@import "ResizableWithInfoView.j"
 
 @implementation WorkspaceView : CPView
 {
@@ -52,7 +52,7 @@
 
 -(void)addElement:(id)element
 {
-	var coverElement = [[ResizableView alloc] initWithElement:element];
+	var coverElement = [[ResizableWithInfoView alloc] initWithElement:element];
 	[coverElement setDelegate:self];
 	[self addSubview:coverElement];
 
