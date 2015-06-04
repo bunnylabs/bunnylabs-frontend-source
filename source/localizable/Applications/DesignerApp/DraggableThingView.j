@@ -39,6 +39,17 @@
 	}
 }
 
+-(void)mouseUp:(CPEvent)anEvent
+{
+	element.dropWindowX = [anEvent locationInWindow].x;
+	element.dropWindowY = [anEvent locationInWindow].y;
+
+	if ([delegate respondsToSelector:@selector(droppedElement:)])
+	{
+		[delegate droppedElement:element];
+	}
+}
+
 -(id)element
 {
 	return element;

@@ -50,6 +50,18 @@
 	[dataSource updateElement:anElement];
 }
 
+-(void)droppedElement:(id)anElement
+{
+	var dropPoint = [self convertPoint:CGPointMake(anElement.dropWindowX, anElement.dropWindowY) fromView:[[self window] contentView]];
+	console.log(dropPoint);
+
+	// Find first element that can be dropped into
+	for (i=0; i<elements.length; i++)
+	{
+	}
+
+}
+
 -(void)addElement:(id)element
 {
 	var coverElement = [[ResizableWithInfoView alloc] initWithElement:element];
@@ -74,7 +86,6 @@
 			[coverElement setView:view];
 			break;
 		}
-
 
 		case "CPButton":
 		{

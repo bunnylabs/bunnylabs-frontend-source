@@ -1,34 +1,123 @@
 @import <Foundation/Foundation.j>
 @import <AppKit/AppKit.j>
 
-@implementation UITreeView : CPView
+@import "WorkspaceModel.j"
+
+@implementation ObjectWrapper : CPObject
 {
-	CPTabView tableView;
+	var value;
 }
 
--(id)init
+-(id)initWithValue:(id)something
+{
+	self = [super init];
+	if (self)
+	{
+		value = something;
+	}
+	return self;
+}
+
+-(id)value
+{
+	return value;
+}
+
++(ObjectWrapper)wrapperForValue:(id)someValue
+{
+	return [[ObjectWrapper alloc] initWithValue:someValue];
+}
+
+@end
+
+@implementation UITreeView : CPView
+{
+	CPTabView outlineView;
+	CPBundle bundle;
+	WorkspaceModel dataSource @accessors;
+}
+
+-(id)initWithBundle:(CPBundle)aBundle
 {
 	self = [super initWithFrame:CGRectMake(0,0,0,20)];
 	if (self)
 	{
-		tableView = [[CPOutlineView alloc] initWithFrame:CGRectMake(0,20,0,0)];
+		bundle = aBundle;
+
+		outlineView = [[CPOutlineView alloc] initWithFrame:CGRectMake(0,20,0,0)];
 
 		var iconColumn = [[CPTableColumn alloc] initWithIdentifier:"icons"];
-		[iconColumn setMaxWidth:25];
-		[iconColumn setMinWidth:25];
+		[iconColumn setMaxWidth:40];
+		[iconColumn setMinWidth:40];
+
 		var iconView = [[CPImageView alloc] initWithFrame:CGRectMake(0,0,20,20)];
 		[iconView setImageAlignment:CPImageAlignCenter];
 		[iconView setImageScaling:CPScaleNone];
 		[iconColumn setDataView:iconView];
-		[tableView addTableColumn:iconColumn];
 
-		[tableView addTableColumn:[[CPTableColumn alloc] initWithIdentifier:"itemname"]];
+		[outlineView addTableColumn:iconColumn];
+		[outlineView addTableColumn:[[CPTableColumn alloc] initWithIdentifier:"itemname"]];
+        [outlineView setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
 
-        [tableView setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
+        [outlineView setDataSource:self];
 
-		[self addSubview:tableView];
+		[self addSubview:outlineView];
 	}
 	return self;
+}
+
+-(void)reloadData
+{
+	[outlineView reloadData];
+}
+
+- (id)outlineView:(CPOutlineView)outlineView child:(CPInteger)index ofItem:(id)item
+{
+	if (item === nil)
+	{
+		return [ObjectWrapper wrapperForValue:[dataSource elements][index]];
+	}
+	return [ObjectWrapper wrapperForValue:item.children[index]];
+}
+
+- (BOOL)outlineView:(CPOutlineView)outlineView isItemExpandable:(id)item
+{
+	if (item === nil)
+	{
+		return true;
+	}
+	return [item value].children.length != 0;
+}
+
+- (int)outlineView:(CPOutlineView)outlineView numberOfChildrenOfItem:(id)item
+{
+	if (!dataSource)
+	{
+		return 0;
+	}
+
+	if (item === nil)
+	{
+		return [dataSource elements].length
+	}
+	return [item value].children.length;
+}
+
+- (id)outlineView:(CPOutlineView)outlineView objectValueForTableColumn:(CPTableColumn)tableColumn byItem:(id)item
+{
+	if ([tableColumn identifier] === "itemname")
+	{
+		return [item value].type;
+	}
+
+	if ([tableColumn identifier] === "icons")
+	{
+		var file = [bundle pathForResource:"Images/" +[item value].type + ".png"];
+		return [[CPImage alloc] initWithContentsOfFile:file];
+	}
+
+
+	return nil;
 }
 
 @end

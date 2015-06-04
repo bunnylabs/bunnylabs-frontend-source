@@ -14,6 +14,8 @@ var MINSIDEBARWIDTH = 200;
 	CPView mainView;
 
     WorkspaceModel model;
+
+    UITreeView uiTreeView;
 }
 
 -(id)initWithBundle:(CPBundle)bundle
@@ -35,14 +37,17 @@ var MINSIDEBARWIDTH = 200;
         [item setView:toolboxView];
         [elementList addTabViewItem:item];
 
+        uiTreeView = [[UITreeView alloc]  initWithBundle:bundle];
         var item = [[CPTabViewItem alloc] init];
         [item setLabel:"UI Tree"];
-        [item setView:[[UITreeView alloc] init]];
+        [item setView:uiTreeView];
         [elementList addTabViewItem:item]; 
 
         [self addSubview:elementList];
 
         model = [[WorkspaceModel alloc] init];
+
+        [uiTreeView setDataSource:model];
 
         mainView = [[WorkspaceView alloc] initWithBundle:bundle];
         [mainView setDataSource:model];
@@ -58,6 +63,7 @@ var MINSIDEBARWIDTH = 200;
 {
     [model addElementOfType:aType];
     [mainView reloadData];
+    [uiTreeView reloadData];
 }
 
 -(CPColor)mainView

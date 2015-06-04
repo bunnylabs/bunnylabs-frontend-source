@@ -55,7 +55,6 @@
 	if (pos.includes("l")) { autosizemask &= ~CPViewMinXMargin; x = 0; }
 
 	return {x:x, y:y, w:w, h:h, type:pos, autosizemask:autosizemask};
-
 }
 
 -(void)updateElement:(id)holder
@@ -64,7 +63,6 @@
 	var y = [self frame].origin.y;
 	var w = [self frame].size.width;
 	var h = [self frame].size.height;
-
 
 	var dx = holder.dx;
 	var dy = holder.dy;
