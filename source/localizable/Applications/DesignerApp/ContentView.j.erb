@@ -50,6 +50,7 @@ var MINSIDEBARWIDTH = 200;
         [uiTreeView setDataSource:model];
 
         mainView = [[WorkspaceView alloc] initWithBundle:bundle];
+        [mainView setDelegate:self];
         [mainView setDataSource:model];
 
         [self addSubview:mainView];
@@ -63,6 +64,11 @@ var MINSIDEBARWIDTH = 200;
 {
     [model addElementOfType:aType];
     [mainView reloadData];
+    [uiTreeView reloadData];
+}
+
+-(void)elementsUpdated
+{
     [uiTreeView reloadData];
 }
 

@@ -2,6 +2,7 @@
 @import <AppKit/AppKit.j>
 
 @import "ResizableView.j"
+@import "PassthruView.j"
 
 @implementation ResizableWithInfoView : ResizableView
 {
@@ -13,7 +14,7 @@
 	self = [super initWithElement:anElement];
 	if (self)
 	{
-		infoLabel = [CPTextField labelWithTitle:"x: y: w: h:"];
+		infoLabel = [PassthruTextField labelWithTitle:"x: y: w: h:"];
 		[infoLabel setFrameOrigin:CGPointMake(10,10)];
 		[infoLabel setBackgroundColor:[[CPColor grayColor] colorWithAlphaComponent:0.5]];
 		[infoLabel setTextColor:[[CPColor whiteColor] colorWithAlphaComponent:0.5]];
