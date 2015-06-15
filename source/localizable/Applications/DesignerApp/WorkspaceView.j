@@ -179,6 +179,14 @@
 			break;
 		}
 
+		case "CPBox":
+		{
+			var view = [[CPBox alloc] initWithFrame:CGRectMake(0, 0, element.w, element.h)];
+			[view setAutoresizingMask: CPViewWidthSizable | CPViewHeightSizable];
+			[coverElement setView:view];
+			break;
+		}
+
 		case "CPTextField":
 		{
 			var view = [[CPTextField alloc] initWithFrame:CGRectMake(0, 0, element.w, element.h)];

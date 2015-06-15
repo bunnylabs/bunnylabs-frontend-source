@@ -49,10 +49,10 @@
 						CPViewMinYMargin |
 						CPViewMaxYMargin;
 
-	if (pos.includes("t")) { autosizemask &= ~CPViewMinYMargin; y = 0; }
-	if (pos.includes("b")) { autosizemask &= ~CPViewMaxYMargin; y = [self frame].size.height - 6; }
-	if (pos.includes("r")) { autosizemask &= ~CPViewMaxXMargin; x = [self frame].size.width - 6; }
-	if (pos.includes("l")) { autosizemask &= ~CPViewMinXMargin; x = 0; }
+	if (pos.indexOf("t") != -1) { autosizemask &= ~CPViewMinYMargin; y = 0; }
+	if (pos.indexOf("b") != -1) { autosizemask &= ~CPViewMaxYMargin; y = [self frame].size.height - 6; }
+	if (pos.indexOf("r") != -1) { autosizemask &= ~CPViewMaxXMargin; x = [self frame].size.width - 6; }
+	if (pos.indexOf("l") != -1) { autosizemask &= ~CPViewMinXMargin; x = 0; }
 
 	return {x:x, y:y, w:w, h:h, type:pos, autosizemask:autosizemask};
 }
@@ -69,10 +69,10 @@
 
 	var theElement = [self element];
 
-	if (holder.type.includes("t")) { theElement.y = y+dy; theElement.h = h-dy; }
-	if (holder.type.includes("b")) { theElement.h = h+dy; }
-	if (holder.type.includes("r")) { theElement.w = w+dx; }
-	if (holder.type.includes("l")) { theElement.x = x+dx; theElement.w = w-dx; }
+	if (holder.type.indexOf("t") != -1) { theElement.y = y+dy; theElement.h = h-dy; }
+	if (holder.type.indexOf("b") != -1) { theElement.h = h+dy; }
+	if (holder.type.indexOf("r") != -1) { theElement.w = w+dx; }
+	if (holder.type.indexOf("l") != -1) { theElement.x = x+dx; theElement.w = w-dx; }
 
 	//console.log(theElement);
 
